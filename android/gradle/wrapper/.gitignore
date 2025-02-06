@@ -1,0 +1,54 @@
+# Flutter/Dart specific
+.dart_tool/
+.build/
+.packages
+.pub-cache/
+.flutter-plugins
+.flutter-plugins-dependencies
+.flutter-versions
+.flutter_settings
+.idea/
+*.iml
+
+# VS Code specific
+.vscode/
+*.code-workspace
+
+# macOS specific
+.DS_Store
+
+# Logs
+*.log
+
+# Android
+android/.gradle/
+android/app/debug/
+android/app/release/
+android/app/profile/
+android/key.properties
+
+# iOS
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/Flutter.podspec
+ios/.generated/
+ios/Runner.xcworkspace/
+
+# Linux
+linux/flutter/generated_plugin_registrant.cc
+
+# Windows
+windows/flutter/generated_plugin_registrant.cc
+
+# Web
+web/.dart_tool/
+
+# Firebase
+firebase_app_id_file.json
+google-services.json
+ios/Runner/GoogleService-Info.plist
+
+# Other unnecessary files
+*.lock
+*.swp
+*.swo
