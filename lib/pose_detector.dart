@@ -1,7 +1,5 @@
-import 'dart:typed_data';
-import 'dart:ui';
-
-
+import 'dart:async';
+import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:google_mlkit_pose_detection/google_mlkit_pose_detection.dart';
@@ -16,6 +14,7 @@ class _PoseDetectorScreenState extends State<PoseDetectorScreen> {
   late List<CameraDescription> _cameras;
   PoseDetector? _poseDetector;
   bool _isDetecting = false;
+  String _poseText = "No pose detected";
 
   @override
   void initState() {
@@ -24,42 +23,59 @@ class _PoseDetectorScreenState extends State<PoseDetectorScreen> {
     _poseDetector = PoseDetector(options: PoseDetectorOptions());
   }
 
+  /// Initializes the camera in portrait mode with high resolution
   Future<void> _initializeCamera() async {
     _cameras = await availableCameras();
-    _cameraController = CameraController(_cameras[0], ResolutionPreset.medium);
+    final backCamera = _cameras.firstWhere(
+        (camera) => camera.lensDirection == CameraLensDirection.back);
+
+    _cameraController = CameraController(
+      backCamera,
+      ResolutionPreset.high,
+      enableAudio: false,
+    );
+
     await _cameraController?.initialize();
     if (!mounted) return;
+
     setState(() {});
+
     _startPoseDetection();
   }
 
+  /// Starts real-time pose detection
   void _startPoseDetection() {
     _cameraController?.startImageStream((CameraImage image) async {
       if (_isDetecting) return;
       _isDetecting = true;
 
-      // Flatten the bytes from the camera image
-      List<int> allBytes = [];
-      for (Plane plane in image.planes) {
-        allBytes.addAll(plane.bytes);
-      }
-
-      final inputImage = InputImage.fromBytes(
-        bytes: Uint8List.fromList(allBytes),
-        metadata: InputImageMetadata(
-          size: Size(image.width.toDouble(), image.height.toDouble()),
-          rotation: InputImageRotation.rotation0deg,
-          format: InputImageFormat.nv21,
-          bytesPerRow: image.planes[0].bytesPerRow,
-        ),
-      );
+      final InputImageRotation rotation = InputImageRotation.rotation0deg;
+      final inputImage = _convertCameraImageToInputImage(image, rotation);
 
       final poses = await _poseDetector!.processImage(inputImage);
-      print("Detected ${poses.length} poses");
 
-      setState(() {});
+      setState(() {
+        _poseText = poses.isNotEmpty ? "Pose Detected: ${poses.length}" : "No pose detected";
+      });
+
       _isDetecting = false;
     });
+  }
+
+  /// Converts camera image to MLKit format
+  InputImage _convertCameraImageToInputImage(
+      CameraImage image, InputImageRotation rotation) {
+    final bytes = image.planes[0].bytes;
+    final inputImage = InputImage.fromBytes(
+      bytes: bytes,
+      metadata: InputImageMetadata(
+        size: Size(image.width.toDouble(), image.height.toDouble()),
+        rotation: rotation,
+        format: InputImageFormat.nv21,
+        bytesPerRow: image.planes[0].bytesPerRow,
+      ),
+    );
+    return inputImage;
   }
 
   @override
@@ -74,7 +90,26 @@ class _PoseDetectorScreenState extends State<PoseDetectorScreen> {
     return Scaffold(
       appBar: AppBar(title: Text('Live Pose Detection')),
       body: _cameraController != null && _cameraController!.value.isInitialized
-          ? CameraPreview(_cameraController!)
+          ? Stack(
+              children: [
+                CameraPreview(_cameraController!),
+                Positioned(
+                  bottom: 20,
+                  left: 0,
+                  right: 0,
+                  child: Center(
+                    child: Container(
+                      padding: EdgeInsets.all(12),
+                      color: Colors.black54,
+                      child: Text(
+                        _poseText,
+                        style: TextStyle(color: Colors.white, fontSize: 18),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            )
           : Center(child: CircularProgressIndicator()),
     );
   }
