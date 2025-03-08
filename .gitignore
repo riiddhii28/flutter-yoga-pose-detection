@@ -43,5 +43,5 @@ android/app/release
 .swiftpm/
 migrate_working_dir/
 
-# Exclude assets folder
+# Exclude assets folder (if you do not want to track assets)
 assets/
