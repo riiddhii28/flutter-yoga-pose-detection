@@ -14,7 +14,7 @@ ios/Runner.xcworkspace/
 ios/build/
 
 # Android related
-/android/.gradle/
+android/.gradle/
 android/local.properties
 android/app/debug
 android/app/profile
@@ -43,5 +43,5 @@ android/app/release
 .swiftpm/
 migrate_working_dir/
 
-# Exclude assets folder (if you do not want to track assets)
+# Exclude assets folder (if you do not want assets tracked)
 assets/
