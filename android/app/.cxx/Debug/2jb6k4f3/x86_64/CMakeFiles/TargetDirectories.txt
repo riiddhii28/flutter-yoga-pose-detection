@@ -1,0 +1,2 @@
+/Users/riddhi/Desktop/yoga/android/app/.cxx/Debug/2jb6k4f3/x86_64/CMakeFiles/edit_cache.dir
+/Users/riddhi/Desktop/yoga/android/app/.cxx/Debug/2jb6k4f3/x86_64/CMakeFiles/rebuild_cache.dir

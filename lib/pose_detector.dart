@@ -1,8 +1,8 @@
-import 'dart:async';
-import 'dart:io';
+import 'dart:typed_data';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
-import 'package:google_mlkit_pose_detection/google_mlkit_pose_detection.dart';
+import 'package:tflite_flutter/tflite_flutter.dart';
+import 'package:image/image.dart' as img;
 
 class PoseDetectorScreen extends StatefulWidget {
   @override
@@ -10,107 +10,109 @@ class PoseDetectorScreen extends StatefulWidget {
 }
 
 class _PoseDetectorScreenState extends State<PoseDetectorScreen> {
-  CameraController? _cameraController;
-  late List<CameraDescription> _cameras;
-  PoseDetector? _poseDetector;
-  bool _isDetecting = false;
-  String _poseText = "No pose detected";
+  late CameraController _cameraController;
+  late Interpreter _interpreter;
+  bool _isModelLoaded = false;
+  String _detectedPose = "Detecting pose...";
 
   @override
   void initState() {
     super.initState();
     _initializeCamera();
-    _poseDetector = PoseDetector(options: PoseDetectorOptions());
+    _loadModel();
   }
 
-  /// Initializes the camera in portrait mode with high resolution
   Future<void> _initializeCamera() async {
-    _cameras = await availableCameras();
-    final backCamera = _cameras.firstWhere(
-        (camera) => camera.lensDirection == CameraLensDirection.back);
-
+    final cameras = await availableCameras();
     _cameraController = CameraController(
-      backCamera,
+      cameras[0], // Use first available camera
       ResolutionPreset.high,
       enableAudio: false,
     );
 
-    await _cameraController?.initialize();
+    await _cameraController.initialize();
     if (!mounted) return;
-
     setState(() {});
-
-    _startPoseDetection();
   }
 
-  /// Starts real-time pose detection
-  void _startPoseDetection() {
-    _cameraController?.startImageStream((CameraImage image) async {
-      if (_isDetecting) return;
-      _isDetecting = true;
+  Future<void> _loadModel() async {
+    _interpreter = await Interpreter.fromAsset('assets/yoga_pose_classifier.tflite');
+    setState(() => _isModelLoaded = true);
+  }
 
-      final InputImageRotation rotation = InputImageRotation.rotation0deg;
-      final inputImage = _convertCameraImageToInputImage(image, rotation);
+  Future<void> _captureAndClassifyPose() async {
+    if (!_isModelLoaded || !_cameraController.value.isInitialized) return;
 
-      final poses = await _poseDetector!.processImage(inputImage);
-
-      setState(() {
-        _poseText = poses.isNotEmpty ? "Pose Detected: ${poses.length}" : "No pose detected";
-      });
-
-      _isDetecting = false;
+    final image = await _cameraController.takePicture();
+    String pose = await classifyPose(image.path);
+    
+    setState(() {
+      _detectedPose = pose;
     });
   }
 
-  /// Converts camera image to MLKit format
-  InputImage _convertCameraImageToInputImage(
-      CameraImage image, InputImageRotation rotation) {
-    final bytes = image.planes[0].bytes;
-    final inputImage = InputImage.fromBytes(
-      bytes: bytes,
-      metadata: InputImageMetadata(
-        size: Size(image.width.toDouble(), image.height.toDouble()),
-        rotation: rotation,
-        format: InputImageFormat.nv21,
-        bytesPerRow: image.planes[0].bytesPerRow,
-      ),
+  Future<String> classifyPose(String imagePath) async {
+    Uint8List imageData = await _loadImageAsBytes(imagePath);
+    img.Image? image = img.decodeImage(imageData);
+
+    if (image == null) return "Unknown Pose";
+
+    // Resize image to 224x224 for model input
+    img.Image resizedImage = img.copyResize(image, width: 224, height: 224);
+
+    List<List<List<double>>> input = List.generate(224, 
+      (y) => List.generate(224, 
+        (x) {
+          var pixel = resizedImage.getPixel(x, y);
+          return [(pixel.r / 255.0), (pixel.g / 255.0), (pixel.b / 255.0)];
+        }
+      )
     );
-    return inputImage;
+
+    var output = List.generate(1, (index) => List.filled(5, 0.0)); // 5 classes
+
+    _interpreter.run([input], output);
+
+    List<String> labels = ["Downdog", "Goddess", "Plank", "Tree", "Warrior2"];
+    
+    int maxIndex = output[0].indexOf(output[0].reduce((a, b) => a > b ? a : b));
+    return labels[maxIndex];
+  }
+
+  Future<Uint8List> _loadImageAsBytes(String path) async {
+    return await XFile(path).readAsBytes();
   }
 
   @override
   void dispose() {
-    _poseDetector?.close();
-    _cameraController?.dispose();
+    _cameraController.dispose();
+    _interpreter.close();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Live Pose Detection')),
-      body: _cameraController != null && _cameraController!.value.isInitialized
-          ? Stack(
-              children: [
-                CameraPreview(_cameraController!),
-                Positioned(
-                  bottom: 20,
-                  left: 0,
-                  right: 0,
-                  child: Center(
-                    child: Container(
-                      padding: EdgeInsets.all(12),
-                      color: Colors.black54,
-                      child: Text(
-                        _poseText,
-                        style: TextStyle(color: Colors.white, fontSize: 18),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            )
-          : Center(child: CircularProgressIndicator()),
+      appBar: AppBar(title: Text("Live Pose Detection")),
+      body: Column(
+        children: [
+          if (_cameraController.value.isInitialized)
+            Expanded(
+              child: CameraPreview(_cameraController),
+            ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              _detectedPose,
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: _captureAndClassifyPose,
+            child: Text("Capture & Detect Pose"),
+          ),
+        ],
+      ),
     );
   }
 }
