@@ -1,4 +1,4 @@
-# Flutter/Dart/Pub related
+# Exclude Flutter build outputs and caches
 .dart_tool/
 .flutter-plugins
 .flutter-plugins-dependencies
@@ -7,23 +7,24 @@
 .pub/
 build/
 
-# iOS related
+# Exclude iOS build artifacts
 ios/Flutter/.last_build_id
 ios/Pods/
 ios/Runner.xcworkspace/
 ios/build/
 
-# Android related
+# Exclude Android build artifacts
 android/.gradle/
 android/local.properties
 android/app/debug
 android/app/profile
 android/app/release
 
+# Exclude additional Android build cache folder
+android/app/.cxx/
+
 # IDEs and Editors
 *.iml
-*.ipr
-*.iws
 .idea/
 .vscode/
 
@@ -43,5 +44,5 @@ android/app/release
 .swiftpm/
 migrate_working_dir/
 
-# Exclude assets folder (if you do not want assets tracked)
+# Optionally, exclude assets if you do not want them tracked
 assets/
