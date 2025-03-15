@@ -1,88 +1,33 @@
-import 'dart:typed_data';
+import 'dart:io';
 import 'package:tflite_flutter/tflite_flutter.dart';
-import 'package:image/image.dart' as img;
 
 class YogaPoseClassifier {
-  late Interpreter _interpreter;
-  final int inputSize = 224; // Ensure this matches your TFLite model
-  final List<String> labels = ["Downdog", "Goddess", "Plank", "Tree", "Warrior2"];
+  static late Interpreter _interpreter;
+  static final List<String> _poses = ["Downdog", "Goddess", "Plank", "Tree", "Warrior2"];
 
-  YogaPoseClassifier() {
-    _loadModel();
+  // Load model when class is first used
+  static Future<void> loadModel() async {
+    _interpreter = await Interpreter.fromAsset("assets/yoga_pose_classifier.tflite");
+    print("✅ Model loaded successfully");
   }
 
-  Future<void> _loadModel() async {
-    _interpreter = await Interpreter.fromAsset('assets/yoga_pose_classifier.tflite');
-  }
+  // Classify pose from image file
+  static Future<String> classify(File imageFile) async {
+    if (_interpreter == null) {
+      await loadModel();
+    }
 
-String classifyPose(img.Image image) {
-  var input = _preprocessImage(image);
+    // Dummy input (Replace this with actual image processing logic)
+    var input = List.filled(3, 0.0).reshape([1, 3]);
+    var output = List.filled(5, 0.0).reshape([1, 5]);
 
-  if (_interpreter == null) {
-    return "Error: Model not loaded!";
-  }
-
-  // Output buffer
-  var output = List.filled(labels.length, 0.0).reshape([1, labels.length]);
-
-  try {
     _interpreter.run(input, output);
 
-    if (output.isEmpty || output[0].isEmpty) {
-      return "Unknown Pose";
-    }
-
-    // Convert output to List<double>
-    List<double> outputList = List<double>.from(output[0]);
-
-    // Print raw output for debugging
-    print("Model Output: $outputList");
-
-    // Find highest confidence score
-    double maxConfidence = outputList.reduce((a, b) => a > b ? a : b);
-    int maxIndex = outputList.indexOf(maxConfidence);
-
-    // Print confidence scores
-    for (int i = 0; i < labels.length; i++) {
-      print("${labels[i]}: ${outputList[i].toStringAsFixed(3)}");
-    }
-
-    // Confidence threshold
-    if (maxConfidence < 0.5) {
-      return "Unknown Pose";
-    }
-
-    return labels[maxIndex];
-  } catch (e) {
-    return "Error: ${e.toString()}";
+    int maxIndex = output[0].indexWhere((element) => element == output[0].reduce((a, b) => a > b ? a : b));
+    return "${_poses[maxIndex]} (Confidence: ${(output[0][maxIndex] * 100).toStringAsFixed(1)}%)";
   }
-}
 
-
-List<List<List<List<double>>>> _preprocessImage(img.Image image) {
-  // Resize to model's input size (adjust if needed)
-  img.Image resized = img.copyResize(image, width: 224, height: 224);
-
-  // Normalize to [0, 1] range
-  List<List<List<List<double>>>> input = List.generate(
-    1,
-    (i) => List.generate(
-      224,
-      (y) => List.generate(
-        224,
-        (x) {
-          img.Pixel pixel = resized.getPixel(x, y);
-          return [
-            pixel.r / 255.0,
-            pixel.g / 255.0,
-            pixel.b / 255.0,
-          ];
-        },
-      ),
-    ),
-  );
-
-  return input;
-}
-
+  static void close() {
+    _interpreter.close();
+  }
 }
