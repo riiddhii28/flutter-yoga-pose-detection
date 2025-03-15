@@ -15,7 +15,7 @@ class _ImagePoseDetectorState extends State<ImagePoseDetector> {
   File? _selectedImage;
   tfl.Interpreter? _interpreter;
   String _detectedPose = "";
-  double _confidence = 0.0;
+  double _accuracy = 0.0;
   final picker = ImagePicker();
 
   @override
@@ -41,71 +41,70 @@ class _ImagePoseDetectorState extends State<ImagePoseDetector> {
 
     setState(() {
       _selectedImage = File(pickedFile.path);
-      _detectedPose = "Processing...";
-      _confidence = 0.0;
+      _detectedPose = ""; // Clear previous result
+      _accuracy = 0.0;
     });
 
     await _detectPose();
   }
 
-Future<void> _detectPose() async {
-  if (_selectedImage == null || _interpreter == null) {
-    setState(() {
-      _detectedPose = "Error in detection";
-    });
-    return;
-  }
-
-  try {
-    // Load and preprocess the image
-    List<List<List<List<double>>>> input = await _preprocessImage(_selectedImage!);
-
-    // Prepare output buffer (change 5 → 6)
-    var output = List.filled(6, 0.0).reshape([1, 6]);
-
-    print("✅ Running inference...");
-    _interpreter!.run(input, output);
-
-    // Get highest confidence index
-    int maxIndex = 0;
-    double maxConfidence = 0.0;
-    for (int i = 1; i < output[0].length; i++) {
-      if (output[0][i] > maxConfidence) {
-        maxConfidence = output[0][i];
-        maxIndex = i - 1;
-      }
+  /// 🔍 Detect Pose with Accuracy Calculation
+  Future<void> _detectPose() async {
+    if (_selectedImage == null || _interpreter == null) {
+      setState(() {
+        _detectedPose = "Error in detection";
+      });
+      return;
     }
 
-    List<String> poseLabels = ["Downdog", "Goddess", "Plank", "Tree", "Warrior2", "UnknownPose"];
+    try {
+      // ✅ Load and preprocess the image
+      List<List<List<List<double>>>> input = await _preprocessImage(_selectedImage!);
 
-    setState(() {
-      _detectedPose = poseLabels[maxIndex];
-      _confidence = maxConfidence;
-    });
+      // ✅ Prepare output buffer
+      var output = List.filled(6, 0.0).reshape([1, 6]);
 
-    print("🧘 Pose Detected: $_detectedPose (Confidence: ${(_confidence * 100).toStringAsFixed(1)}%)");
-  } catch (e) {
-    setState(() {
-      _detectedPose = "Error in detection";
-    });
-    print("❌ Error detecting pose: $e");
+      print("✅ Running inference...");
+      _interpreter!.run(input, output);
+
+      // ✅ Find the pose with the highest accuracy
+      int maxIndex = 0;
+      double maxAccuracy = 0.0;
+      for (int i = 1; i < output[0].length; i++) {
+        if (output[0][i] > maxAccuracy) {
+          maxAccuracy = output[0][i];
+          maxIndex = i - 1;
+        }
+      }
+
+      // ✅ Yoga Pose Labels (Ensure these match your model's classes)
+      List<String> poseLabels = ["Downdog", "Goddess", "Plank", "Tree", "Warrior2", "UnknownPose"];
+
+      setState(() {
+        _detectedPose = poseLabels[maxIndex];
+        _accuracy = maxAccuracy; // Use accuracy instead of confidence
+      });
+
+      print("🧘 Pose Detected: $_detectedPose (Accuracy: ${(_accuracy * 100).toStringAsFixed(1)}%)");
+    } catch (e) {
+      setState(() {
+        _detectedPose = "Error in detection";
+      });
+      print("❌ Error detecting pose: $e");
+    }
   }
-}
 
-
-  /// 📏 Preprocess Image (Fixed Issues)
+  /// 📏 Preprocess Image for Model (Fixed Issues)
   Future<List<List<List<List<double>>>>> _preprocessImage(File imageFile) async {
     try {
       Uint8List imageBytes = await imageFile.readAsBytes();
       img.Image? image = img.decodeImage(imageBytes);
-      if (image == null) {
-        throw Exception("Failed to decode image");
-      }
+      if (image == null) throw Exception("Failed to decode image");
 
       // ✅ Resize image to 224x224
       img.Image resizedImage = img.copyResize(image, width: 224, height: 224);
 
-      // ✅ Convert to normalized tensor format (4D: [1, 224, 224, 3])
+      // ✅ Convert image to tensor format (4D: [1, 224, 224, 3])
       List<List<List<List<double>>>> input = [
         List.generate(
           224,
@@ -116,7 +115,7 @@ Future<void> _detectPose() async {
               return [
                 pixel.r / 255.0, // Normalize Red
                 pixel.g / 255.0, // Normalize Green
-                pixel.b / 255.0 // Normalize Blue
+                pixel.b / 255.0  // Normalize Blue
               ];
             },
           ),
@@ -136,26 +135,38 @@ Future<void> _detectPose() async {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Upload Image for Detection")),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          _selectedImage == null
-              ? Text("No image selected", style: TextStyle(fontSize: 18))
-              : Image.file(_selectedImage!, height: 250),
+      appBar: AppBar(title: Text("Yoga Pose Detection")),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // ✅ Show Image Only If Selected
+            if (_selectedImage != null)
+              ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: Image.file(
+                  _selectedImage!,
+                  height: 300,
+                  width: double.infinity,
+                  fit: BoxFit.cover, // Ensure proper aspect ratio
+                ),
+              )
+            else
+              Text("No image selected", style: TextStyle(fontSize: 18)),
 
-          SizedBox(height: 20),
+            SizedBox(height: 20),
 
-          ElevatedButton(
-            onPressed: _pickImage,
-            child: Text("Pick Image"),
-          ),
+            ElevatedButton(
+              onPressed: _pickImage,
+              child: Text("Pick Image"),
+            ),
 
-          SizedBox(height: 20),
+            SizedBox(height: 20),
 
-          // ✅ Display Pose Detection Result
-          ResultDisplay(poseName: _detectedPose, confidence: _confidence),
-        ],
+            // ✅ Display Pose Detection Result
+            ResultDisplay(poseName: _detectedPose, accuracy: _accuracy),
+          ],
+        ),
       ),
     );
   }
