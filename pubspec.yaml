@@ -28,6 +28,13 @@ flutter:
 
   assets:
     - assets/yoga_pose_classifier.tflite
-    - assets/yoga_logo.webp
+    - assets/images/yoga_home.png
+    - assets/images/yoga_logo.png
+    - assets/images/downdog.png
+    - assets/images/goddess.png
+    - assets/images/plank.png
+    - assets/images/tree.png
+    - assets/images/warrior2.png
+
 
 

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'homepage.dart';
+import 'routes.dart';
 
 void main() {
   runApp(YogaBlissApp());
@@ -9,12 +9,14 @@ class YogaBlissApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'YogaBliss',
+      title: "YogaBliss",
       theme: ThemeData(
         primarySwatch: Colors.blue,
+        visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: HomePage(),
+      debugShowCheckedModeBanner: false,
+      initialRoute: "/",
+      routes: getAppRoutes(),
     );
   }
 }
