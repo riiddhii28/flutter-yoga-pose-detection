@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.yoga"
+    namespace = "com.example.yoga_new"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -19,8 +19,8 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.example.yoga"
-        minSdk = flutter.minSdkVersion
+        applicationId = "com.example.yoga_new"
+        minSdkVersion 23
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
@@ -36,3 +36,6 @@ android {
 flutter {
     source = "../.."
 }
+
+apply plugin: 'com.google.gms.google-services'
+

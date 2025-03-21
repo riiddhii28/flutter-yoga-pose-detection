@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:tflite_flutter/tflite_flutter.dart' as tfl;
+import 'package:flutter/services.dart';
 import '../widgets/result_display.dart';
 
 class LivePoseDetector extends StatefulWidget {
@@ -25,26 +26,42 @@ class _LivePoseDetectorState extends State<LivePoseDetector> {
 
   /// 📸 Initialize Camera
   Future<void> _initializeCamera() async {
-    _cameras = await availableCameras();
-    _cameraController = CameraController(
-      _cameras[0], // Use the first available camera
-      ResolutionPreset.medium,
-      enableAudio: false,
-    );
+    try {
+      _cameras = await availableCameras();
+      _cameraController = CameraController(
+        _cameras[0], // Use first available camera
+        ResolutionPreset.medium,
+        enableAudio: false,
+      );
 
-    await _cameraController!.initialize();
-    if (!mounted) return;
+      await _cameraController!.initialize();
+      if (!mounted) return;
 
-    setState(() {});
+      setState(() {});
 
-    _cameraController!.startImageStream((CameraImage image) {
-      if (!_isDetecting) {
-        _isDetecting = true;
-        _detectPose(image).then((_) {
-          _isDetecting = false;
-        });
-      }
-    });
+      _cameraController!.startImageStream((CameraImage image) {
+        if (!_isDetecting) {
+          _isDetecting = true;
+          _detectPose(image).then((_) {
+            Future.delayed(Duration(milliseconds: 200), () { // 🔹 Add delay
+              _isDetecting = false;
+            });
+          });
+        }
+      });
+    } catch (e) {
+      print("❌ Error initializing camera: $e");
+    }
+  }
+
+  /// ✅ Fix Camera Rotation
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
   }
 
   /// ✅ Load TensorFlow Lite Model
@@ -60,12 +77,13 @@ class _LivePoseDetectorState extends State<LivePoseDetector> {
   /// 🤖 Run Pose Detection on Live Camera Frame
   Future<void> _detectPose(CameraImage image) async {
     if (_interpreter == null) return;
+    if (!mounted) return; // 🔹 Prevent running inference if widget is removed
 
     try {
       // 📏 Preprocess Image (Resize & Normalize)
       List<List<List<List<double>>>> input = _preprocessImage(image);
 
-      // 📤 Prepare output buffer (Change 5 → 6)
+      // 📤 Prepare output buffer
       var output = List.filled(6, 0.0).reshape([1, 6]);
 
       print("✅ Running inference...");
@@ -74,19 +92,21 @@ class _LivePoseDetectorState extends State<LivePoseDetector> {
       // 🏆 Get highest confidence index
       int maxIndex = 0;
       double maxConfidence = 0.0;
-      for (int i = 1; i < output[0].length; i++) {
+      for (int i = 0; i < output[0].length; i++) { // 🔹 Fixed index
         if (output[0][i] > maxConfidence) {
           maxConfidence = output[0][i];
-          maxIndex = i - 1;
+          maxIndex = i;
         }
       }
 
       List<String> poseLabels = ["Downdog", "Goddess", "Plank", "Tree", "Warrior2", "UnknownPose"];
 
-      setState(() {
-        _detectedPose = poseLabels[maxIndex];
-        _confidence = maxConfidence;  // Update confidence value
-      });
+      if (mounted) { // 🔹 Prevent calling setState() if widget is disposed
+        setState(() {
+          _detectedPose = poseLabels[maxIndex];
+          _confidence = maxConfidence;
+        });
+      }
 
       print("🧘 Pose Detected: $_detectedPose (Confidence: ${(_confidence * 100).toStringAsFixed(1)}%)");
     } catch (e) {
@@ -97,7 +117,6 @@ class _LivePoseDetectorState extends State<LivePoseDetector> {
   /// 📏 Preprocess Image (Resize & Normalize)
   List<List<List<List<double>>>> _preprocessImage(CameraImage image) {
     // Convert image to normalized tensor format
-    // Skipping actual preprocessing for brevity (convert YUV to RGB and resize)
     return [
       List.generate(224, (_) => List.generate(224, (_) => List.generate(3, (_) => 0.0))) // Dummy Data
     ];
@@ -105,7 +124,9 @@ class _LivePoseDetectorState extends State<LivePoseDetector> {
 
   @override
   void dispose() {
-    _cameraController?.dispose();
+    _cameraController?.stopImageStream(); // 🔹 Stop image stream
+    _cameraController?.dispose(); // 🔹 Properly release camera
+    _interpreter?.close(); // 🔹 Free up TFLite model
     super.dispose();
   }
 
@@ -117,8 +138,8 @@ class _LivePoseDetectorState extends State<LivePoseDetector> {
         children: [
           // 🎥 Camera Preview
           _cameraController != null && _cameraController!.value.isInitialized
-              ? Container(
-                  height: 400,
+              ? AspectRatio(
+                  aspectRatio: _cameraController!.value.aspectRatio,
                   child: CameraPreview(_cameraController!),
                 )
               : Center(child: CircularProgressIndicator()),

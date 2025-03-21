@@ -22,9 +22,21 @@ plugins {
     
     // Android Plugin for Gradle
     id "com.android.application" version "8.2.1" apply false
+    // START: FlutterFire Configuration
+    id "com.google.gms.google-services" version "4.3.15" apply false
+    // END: FlutterFire Configuration
     
     // Kotlin Plugin for Android
     id "org.jetbrains.kotlin.android" version "1.8.22" apply false
+}
+
+dependencyResolutionManagement {  // ✅ ADD THIS BLOCK BELOW
+    repositoriesMode.set(RepositoriesMode.PREFER_PROJECT)
+    repositories {
+        google()       // ✅ Add this
+        mavenCentral() // ✅ Add this
+        gradlePluginPortal() // ✅ Add this
+    }
 }
 
 include ":app"

@@ -6,65 +6,75 @@ class HomeScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: Text("YogaBliss 🧘‍♂️")),
       drawer: _buildDrawer(context), // Side navigation drawer
-      body: Center(
-        child: Padding(
-          padding: EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Image.asset(
-                "assets/images/yoga_home.png", // Add a yoga-themed image
-                height: 150,
-              ),
-              SizedBox(height: 20),
-              Text(
-                "Welcome to YogaBliss!",
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-              ),
-              SizedBox(height: 10),
-              Text(
-                "Improve your yoga practice with AI-powered pose detection and guided exercises.",
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 16, color: Colors.black54),
-              ),
-              SizedBox(height: 20),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Column(
+              children: [
+                Image.asset(
+                  "assets/images/yoga_home.png",
+                  height: 150,
+                  fit: BoxFit.cover, // Prevent overflow
+                ),
+                SizedBox(height: 20),
+                Text(
+                  "Welcome to YogaBliss!",
+                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                ),
+                SizedBox(height: 10),
+                Text(
+                  "Improve your yoga practice with AI-powered pose detection and guided exercises.",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 16, color: Colors.black54),
+                ),
+                SizedBox(height: 20),
 
-              // 📸 Pose Detection Button
-              _buildFeatureButton(
-                context,
-                "📸 Image Pose Detection",
-                "Detect your yoga pose in real-time or from an image.",
-                Icons.camera,
-                "/poseDetection",
-              ),
-
-              // 📹 Live Pose Detection Button
-              _buildFeatureButton(
-                context,
-                "📹 Live Pose Detection",
-                "Use your camera to detect yoga poses in real-time.",
-                Icons.videocam,
-                "/livePose",
-              ),
-
-              // 📖 Pose Guide Button
-              _buildFeatureButton(
-                context,
-                "📖 Pose Guide",
-                "Learn the correct form of different yoga poses.",
-                Icons.book,
-                "/poseGuide",
-              ),
-
-              // ℹ️ About Page Button
-              _buildFeatureButton(
-                context,
-                "ℹ️ About",
-                "Learn more about YogaBliss and its features.",
-                Icons.info_outline,
-                "/about",
-              ),
-            ],
+                // Feature Buttons
+                _buildFeatureButton(
+                  context,
+                  "📸 Image Pose Detection",
+                  "Detect your yoga pose in real-time or from an image.",
+                  Icons.camera,
+                  "/poseDetection",
+                ),
+                _buildFeatureButton(
+                  context,
+                  "📹 Live Pose Detection",
+                  "Use your camera to detect yoga poses in real-time.",
+                  Icons.videocam,
+                  "/livePose",
+                ),
+                _buildFeatureButton(
+                  context,
+                  "📖 Pose Guide",
+                  "Learn the correct form of different yoga poses.",
+                  Icons.book,
+                  "/poseGuide",
+                ),
+                _buildFeatureButton(
+                  context,
+                  "🏆 Leaderboard",
+                  "Track progress and compare with others.",
+                  Icons.leaderboard,
+                  "/leaderboard",
+                ),
+                _buildFeatureButton(
+                  context,
+                  "👤 My Profile",
+                  "View and update your profile.",
+                  Icons.person,
+                  "/profile",
+                ),
+                _buildFeatureButton(
+                  context,
+                  "ℹ️ About",
+                  "Learn more about YogaBliss and its features.",
+                  Icons.info_outline,
+                  "/about",
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -91,6 +101,8 @@ class HomeScreen extends StatelessWidget {
           ),
           _buildDrawerItem(context, Icons.camera, "Pose Detection", "/poseDetection"),
           _buildDrawerItem(context, Icons.book, "Pose Guide", "/poseGuide"),
+          _buildDrawerItem(context, Icons.leaderboard, "Leaderboard", "/leaderboard"),
+          _buildDrawerItem(context, Icons.person, "My Profile", "/profile"),
           _buildDrawerItem(context, Icons.info_outline, "About", "/about"),
         ],
       ),

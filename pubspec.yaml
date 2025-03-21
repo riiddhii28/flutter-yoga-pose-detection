@@ -11,12 +11,19 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.8
-  camera: ^0.11.1
+  camera: ^0.10.5+3
   image_picker: ^1.1.2
   image: ^4.1.3  
   google_mlkit_pose_detection: ^0.13.0
   tflite_flutter: ^0.11.0
   #tflite: ^1.1.2
+  firebase_core: ^3.12.1
+  firebase_auth: ^5.5.1
+  cloud_firestore: ^5.6.5
+  firebase_storage: any
+  change_app_package_name: ^1.5.0
+
+
 
 dev_dependencies:
   flutter_test:

@@ -18,6 +18,11 @@ class _ImagePoseDetectorState extends State<ImagePoseDetector> {
   double _accuracy = 0.0;
   final picker = ImagePicker();
 
+  // ✅ Debounce Variables
+  String _lastDetectedPose = "";
+  double _lastAccuracy = 0.0;
+  int _frameCount = 0;
+
   @override
   void initState() {
     super.initState();
@@ -41,14 +46,14 @@ class _ImagePoseDetectorState extends State<ImagePoseDetector> {
 
     setState(() {
       _selectedImage = File(pickedFile.path);
-      _detectedPose = ""; // Clear previous result
+      _detectedPose = "";
       _accuracy = 0.0;
     });
 
     await _detectPose();
   }
 
-  /// 🔍 Detect Pose with Accuracy Calculation
+  /// 🔍 Detect Pose with Optimizations
   Future<void> _detectPose() async {
     if (_selectedImage == null || _interpreter == null) {
       setState(() {
@@ -57,17 +62,17 @@ class _ImagePoseDetectorState extends State<ImagePoseDetector> {
       return;
     }
 
-    try {
-      // ✅ Load and preprocess the image
-      List<List<List<List<double>>>> input = await _preprocessImage(_selectedImage!);
+    // ✅ Frame Skipping → Runs inference on every 5th frame
+    _frameCount++;
+    if (_frameCount % 5 != 0) return; 
 
-      // ✅ Prepare output buffer
+    try {
+      List<List<List<List<double>>>> input = await _preprocessImage(_selectedImage!);
       var output = List.filled(6, 0.0).reshape([1, 6]);
 
       print("✅ Running inference...");
       _interpreter!.run(input, output);
 
-      // ✅ Find the pose with the highest accuracy
       int maxIndex = 0;
       double maxAccuracy = 0.0;
       for (int i = 1; i < output[0].length; i++) {
@@ -77,15 +82,22 @@ class _ImagePoseDetectorState extends State<ImagePoseDetector> {
         }
       }
 
-      // ✅ Yoga Pose Labels (Ensure these match your model's classes)
       List<String> poseLabels = ["Downdog", "Goddess", "Plank", "Tree", "Warrior2", "UnknownPose"];
+      String newPose = poseLabels[maxIndex];
+      double newAccuracy = maxAccuracy;
 
-      setState(() {
-        _detectedPose = poseLabels[maxIndex];
-        _accuracy = maxAccuracy; // Use accuracy instead of confidence
-      });
+      // ✅ Debounce Mechanism → Updates pose only if it changes or accuracy fluctuates by >5%
+      if (newPose != _lastDetectedPose || (newAccuracy - _lastAccuracy).abs() > 0.05) {
+        setState(() {
+          _detectedPose = newPose;
+          _accuracy = newAccuracy;
+        });
 
-      print("🧘 Pose Detected: $_detectedPose (Accuracy: ${(_accuracy * 100).toStringAsFixed(1)}%)");
+        _lastDetectedPose = newPose;
+        _lastAccuracy = newAccuracy;
+
+        print("🧘 Pose Detected: $_detectedPose (Accuracy: ${(_accuracy * 100).toStringAsFixed(1)}%)");
+      }
     } catch (e) {
       setState(() {
         _detectedPose = "Error in detection";
@@ -94,17 +106,15 @@ class _ImagePoseDetectorState extends State<ImagePoseDetector> {
     }
   }
 
-  /// 📏 Preprocess Image for Model (Fixed Issues)
+  /// 📏 Preprocess Image for Model
   Future<List<List<List<List<double>>>>> _preprocessImage(File imageFile) async {
     try {
       Uint8List imageBytes = await imageFile.readAsBytes();
       img.Image? image = img.decodeImage(imageBytes);
       if (image == null) throw Exception("Failed to decode image");
 
-      // ✅ Resize image to 224x224
       img.Image resizedImage = img.copyResize(image, width: 224, height: 224);
 
-      // ✅ Convert image to tensor format (4D: [1, 224, 224, 3])
       List<List<List<List<double>>>> input = [
         List.generate(
           224,
@@ -113,9 +123,9 @@ class _ImagePoseDetectorState extends State<ImagePoseDetector> {
             (x) {
               img.Color pixel = resizedImage.getPixel(x, y);
               return [
-                pixel.r / 255.0, // Normalize Red
-                pixel.g / 255.0, // Normalize Green
-                pixel.b / 255.0  // Normalize Blue
+                pixel.r / 255.0,
+                pixel.g / 255.0,
+                pixel.b / 255.0
               ];
             },
           ),
@@ -127,7 +137,7 @@ class _ImagePoseDetectorState extends State<ImagePoseDetector> {
     } catch (e) {
       print("❌ Error preprocessing image: $e");
       return [
-        List.generate(224, (_) => List.generate(224, (_) => List.generate(3, (_) => 0.0))) // Dummy Data
+        List.generate(224, (_) => List.generate(224, (_) => List.generate(3, (_) => 0.0)))
       ];
     }
   }
@@ -140,7 +150,6 @@ class _ImagePoseDetectorState extends State<ImagePoseDetector> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // ✅ Show Image Only If Selected
             if (_selectedImage != null)
               ClipRRect(
                 borderRadius: BorderRadius.circular(10),
@@ -148,7 +157,7 @@ class _ImagePoseDetectorState extends State<ImagePoseDetector> {
                   _selectedImage!,
                   height: 300,
                   width: double.infinity,
-                  fit: BoxFit.cover, // Ensure proper aspect ratio
+                  fit: BoxFit.cover,
                 ),
               )
             else
