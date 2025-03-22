@@ -18,11 +18,6 @@ class _ImagePoseDetectorState extends State<ImagePoseDetector> {
   double _accuracy = 0.0;
   final picker = ImagePicker();
 
-  // ✅ Debounce Variables
-  String _lastDetectedPose = "";
-  double _lastAccuracy = 0.0;
-  int _frameCount = 0;
-
   @override
   void initState() {
     super.initState();
@@ -34,12 +29,14 @@ class _ImagePoseDetectorState extends State<ImagePoseDetector> {
     try {
       _interpreter = await tfl.Interpreter.fromAsset("assets/yoga_pose_classifier.tflite");
       print("✅ Model loaded successfully!");
+      print("📌 Model Input Shape: ${_interpreter!.getInputTensor(0).shape}");
+      print("📌 Model Output Shape: ${_interpreter!.getOutputTensor(0).shape}");
     } catch (e) {
       print("❌ Error loading model: $e");
     }
   }
 
-  /// 📸 Pick an Image from Gallery
+  /// 📸 Pick Image from Gallery
   Future<void> _pickImage() async {
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
     if (pickedFile == null) return;
@@ -53,7 +50,7 @@ class _ImagePoseDetectorState extends State<ImagePoseDetector> {
     await _detectPose();
   }
 
-  /// 🔍 Detect Pose with Optimizations
+  /// 🔍 Detect Pose
   Future<void> _detectPose() async {
     if (_selectedImage == null || _interpreter == null) {
       setState(() {
@@ -62,16 +59,15 @@ class _ImagePoseDetectorState extends State<ImagePoseDetector> {
       return;
     }
 
-    // ✅ Frame Skipping → Runs inference on every 5th frame
-    _frameCount++;
-    if (_frameCount % 5 != 0) return; 
-
     try {
+      print("📸 Image Selected: ${_selectedImage!.path}");
+
       List<List<List<List<double>>>> input = await _preprocessImage(_selectedImage!);
       var output = List.filled(6, 0.0).reshape([1, 6]);
 
       print("✅ Running inference...");
       _interpreter!.run(input, output);
+      print("📊 Model Output: $output");
 
       int maxIndex = 0;
       double maxAccuracy = 0.0;
@@ -86,18 +82,12 @@ class _ImagePoseDetectorState extends State<ImagePoseDetector> {
       String newPose = poseLabels[maxIndex];
       double newAccuracy = maxAccuracy;
 
-      // ✅ Debounce Mechanism → Updates pose only if it changes or accuracy fluctuates by >5%
-      if (newPose != _lastDetectedPose || (newAccuracy - _lastAccuracy).abs() > 0.05) {
-        setState(() {
-          _detectedPose = newPose;
-          _accuracy = newAccuracy;
-        });
+      setState(() {
+        _detectedPose = newPose;
+        _accuracy = newAccuracy;
+      });
 
-        _lastDetectedPose = newPose;
-        _lastAccuracy = newAccuracy;
-
-        print("🧘 Pose Detected: $_detectedPose (Accuracy: ${(_accuracy * 100).toStringAsFixed(1)}%)");
-      }
+      print("🧘 Pose Detected: $_detectedPose (Accuracy: ${(_accuracy * 100).toStringAsFixed(1)}%)");
     } catch (e) {
       setState(() {
         _detectedPose = "Error in detection";
@@ -106,7 +96,7 @@ class _ImagePoseDetectorState extends State<ImagePoseDetector> {
     }
   }
 
-  /// 📏 Preprocess Image for Model
+  /// 📏 Preprocess Image
   Future<List<List<List<List<double>>>>> _preprocessImage(File imageFile) async {
     try {
       Uint8List imageBytes = await imageFile.readAsBytes();
