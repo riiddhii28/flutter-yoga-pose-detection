@@ -3,32 +3,43 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'login_screen.dart';
 
 class HomeScreen extends StatelessWidget {
-  final FirebaseAuth _auth = FirebaseAuth.instance; // ✅ Firebase Auth instance
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("YogaBliss 🧘‍♂️")),
-      drawer: _buildDrawer(context), // ✅ Updated drawer with logout
+      backgroundColor: Color(0xFFF9F5F0), // Light beige background
+      appBar: AppBar(
+        title: Text("YogaBliss 🧘‍♂️", style: TextStyle(color: Colors.white)),
+        backgroundColor: Color(0xFF6D3A3F), // Wine red
+        elevation: 0,
+      ),
+      drawer: _buildDrawer(context), // ✅ Updated Sidebar
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
             padding: EdgeInsets.all(16.0),
             child: Column(
               children: [
-                Image.asset(
-                  "assets/images/yoga_home.png",
-                  height: 150,
-                  fit: BoxFit.cover, // Prevent overflow
+                // Hero Image
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(15),
+                  child: Image.asset(
+                    "assets/images/yoga_home.png",
+                    height: 170,
+                    fit: BoxFit.cover,
+                  ),
                 ),
                 SizedBox(height: 20),
+
+                // Welcome Text
                 Text(
                   "Welcome to YogaBliss!",
-                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF6D3A3F)),
                 ),
-                SizedBox(height: 10),
+                SizedBox(height: 8),
                 Text(
-                  "Improve your yoga practice with AI-powered pose detection and guided exercises.",
+                  "Enhance your yoga practice with AI-powered pose detection and guidance.",
                   textAlign: TextAlign.center,
                   style: TextStyle(fontSize: 16, color: Colors.black54),
                 ),
@@ -39,42 +50,49 @@ class HomeScreen extends StatelessWidget {
                   context,
                   "📸 Image Pose Detection",
                   "Detect your yoga pose in real-time or from an image.",
-                  Icons.camera,
+                  Icons.camera_alt_rounded,
                   "/poseDetection",
                 ),
                 _buildFeatureButton(
                   context,
                   "📹 Live Pose Detection",
                   "Use your camera to detect yoga poses in real-time.",
-                  Icons.videocam,
+                  Icons.videocam_rounded,
                   "/livePose",
                 ),
                 _buildFeatureButton(
                   context,
                   "📖 Pose Guide",
                   "Learn the correct form of different yoga poses.",
-                  Icons.book,
+                  Icons.book_rounded,
                   "/poseGuide",
                 ),
                 _buildFeatureButton(
                   context,
                   "🏆 Leaderboard",
                   "Track progress and compare with others.",
-                  Icons.leaderboard,
+                  Icons.leaderboard_rounded,
                   "/leaderboard",
+                ),
+                _buildFeatureButton(
+                  context,
+                  "📜 Pose History", // ✅ Pose History Button Added
+                  "View your past pose analysis and track improvements.",
+                  Icons.history_rounded,
+                  "/poseHistory",
                 ),
                 _buildFeatureButton(
                   context,
                   "👤 My Profile",
                   "View and update your profile.",
-                  Icons.person,
+                  Icons.person_rounded,
                   "/profile",
                 ),
                 _buildFeatureButton(
                   context,
                   "ℹ️ About",
                   "Learn more about YogaBliss and its features.",
-                  Icons.info_outline,
+                  Icons.info_outline_rounded,
                   "/about",
                 ),
               ],
@@ -85,31 +103,38 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  /// 📜 Drawer for Navigation (Updated with Logout)
+  /// 📜 Sidebar Drawer (Improved UI & Added Pose History)
   Widget _buildDrawer(BuildContext context) {
     return Drawer(
+      backgroundColor: Colors.white,
       child: ListView(
         padding: EdgeInsets.zero,
         children: [
+          // Drawer Header
           DrawerHeader(
-            decoration: BoxDecoration(color: Colors.blueAccent),
+            decoration: BoxDecoration(color: Color(0xFF6D3A3F)),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(Icons.spa, size: 50, color: Colors.white),
+                Icon(Icons.spa_rounded, size: 50, color: Colors.white),
                 SizedBox(height: 10),
-                Text("YogaBliss", style: TextStyle(color: Colors.white, fontSize: 22)),
-                Text("Your Personal Yoga Guide", style: TextStyle(color: Colors.white70)),
+                Text("YogaBliss", style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
+                Text("Your Personal Yoga Guide", style: TextStyle(color: Colors.white70, fontSize: 14)),
               ],
             ),
           ),
-          _buildDrawerItem(context, Icons.camera, "Pose Detection", "/poseDetection"),
-          _buildDrawerItem(context, Icons.book, "Pose Guide", "/poseGuide"),
-          _buildDrawerItem(context, Icons.leaderboard, "Leaderboard", "/leaderboard"),
-          _buildDrawerItem(context, Icons.person, "My Profile", "/profile"),
-          _buildDrawerItem(context, Icons.info_outline, "About", "/about"),
+
+          // Navigation Items
+          _buildDrawerItem(context, Icons.camera_alt_rounded, "Pose Detection", "/poseDetection"),
+          _buildDrawerItem(context, Icons.book_rounded, "Pose Guide", "/poseGuide"),
+          _buildDrawerItem(context, Icons.leaderboard_rounded, "Leaderboard", "/leaderboard"),
+          _buildDrawerItem(context, Icons.history_rounded, "Pose History", "/poseHistory"), // ✅ Pose History Added
+          _buildDrawerItem(context, Icons.person_rounded, "My Profile", "/profile"),
+          _buildDrawerItem(context, Icons.info_outline_rounded, "About", "/about"),
+
           Divider(), // ✅ Separate logout option
-          _buildDrawerItem(context, Icons.logout, "Logout", null, isLogout: true),
+
+          _buildDrawerItem(context, Icons.logout_rounded, "Logout", null, isLogout: true),
         ],
       ),
     );
@@ -118,12 +143,14 @@ class HomeScreen extends StatelessWidget {
   /// 📌 Feature Button (For Home Page)
   Widget _buildFeatureButton(BuildContext context, String title, String subtitle, IconData icon, String route) {
     return Card(
-      elevation: 3,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      elevation: 4,
+      color: Colors.white,
       child: ListTile(
-        leading: Icon(icon, color: Colors.blueAccent),
-        title: Text(title, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        leading: Icon(icon, color: Color(0xFF6D3A3F), size: 28),
+        title: Text(title, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87)),
         subtitle: Text(subtitle, style: TextStyle(fontSize: 14, color: Colors.black54)),
-        trailing: Icon(Icons.arrow_forward_ios, size: 18, color: Colors.black54),
+        trailing: Icon(Icons.arrow_forward_ios_rounded, size: 18, color: Colors.black54),
         onTap: () {
           Navigator.pushNamed(context, route);
         },
@@ -134,11 +161,11 @@ class HomeScreen extends StatelessWidget {
   /// 📌 Drawer Item (For Sidebar Navigation)
   Widget _buildDrawerItem(BuildContext context, IconData icon, String title, String? route, {bool isLogout = false}) {
     return ListTile(
-      leading: Icon(icon, color: isLogout ? Colors.red : Colors.blueAccent),
-      title: Text(title, style: TextStyle(fontSize: 16)),
+      leading: Icon(icon, color: isLogout ? Colors.red : Color(0xFF6D3A3F)),
+      title: Text(title, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
       onTap: () async {
         if (isLogout) {
-          await _auth.signOut(); // ✅ Sign out
+          await _auth.signOut();
           Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => LoginScreen()));
         } else {
           Navigator.pop(context);

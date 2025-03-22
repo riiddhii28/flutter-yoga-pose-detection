@@ -18,7 +18,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   double highestAccuracy = 0.0;
   String joinDate = "";
   String profilePicUrl = "";
-  
+
   @override
   void initState() {
     super.initState();
@@ -65,35 +65,100 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("My Profile")),
-      body: Padding(
+      backgroundColor: Color(0xFFF9F5F0), // Light beige background
+      appBar: AppBar(
+        title: Text("My Profile", style: TextStyle(color: Colors.white)),
+        backgroundColor: Color(0xFF6D3A3F), // Wine Red Header
+        elevation: 0,
+      ),
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
+            // Profile Picture
             GestureDetector(
               onTap: _uploadProfilePicture,
               child: CircleAvatar(
-                radius: 50,
+                radius: 60,
+                backgroundColor: Colors.grey.shade300,
                 backgroundImage: profilePicUrl.isNotEmpty
                     ? NetworkImage(profilePicUrl)
                     : AssetImage("assets/images/default_avatar.png") as ImageProvider,
+                child: profilePicUrl.isEmpty
+                    ? Icon(Icons.camera_alt, color: Colors.grey.shade600, size: 30)
+                    : null,
               ),
             ),
             SizedBox(height: 20),
-            Text("Email: $email", style: TextStyle(fontSize: 18)),
-            SizedBox(height: 10),
-            Text("Highest Accuracy: ${(highestAccuracy * 100).toStringAsFixed(1)}%", style: TextStyle(fontSize: 18)),
-            SizedBox(height: 10),
-            Text("Joined: $joinDate", style: TextStyle(fontSize: 18)),
-            SizedBox(height: 20),
-            ElevatedButton.icon(
+
+            // User Details
+            Card(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+              elevation: 4,
+              color: Colors.white,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+                child: Column(
+                  children: [
+                    _buildProfileRow(Icons.email, "Email", email),
+                    Divider(color: Colors.grey.shade300),
+                    _buildProfileRow(Icons.stars, "Highest Accuracy", "${(highestAccuracy * 100).toStringAsFixed(1)}%"),
+                    Divider(color: Colors.grey.shade300),
+                    _buildProfileRow(Icons.calendar_today, "Joined", joinDate),
+                  ],
+                ),
+              ),
+            ),
+            SizedBox(height: 30),
+
+            // Logout Button with Gradient
+            ElevatedButton(
               onPressed: _logout,
-              icon: Icon(Icons.logout),
-              label: Text("Logout"),
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+              style: ElevatedButton.styleFrom(
+                padding: EdgeInsets.symmetric(vertical: 14, horizontal: 40),
+                backgroundColor: Colors.transparent,
+                shadowColor: Colors.transparent,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+              ),
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Color(0xFF6D3A3F), Color(0xFFA89A8D)], // Wine Red → Taupe Gradient
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(30),
+                ),
+                padding: EdgeInsets.symmetric(vertical: 14),
+                alignment: Alignment.center,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.logout, color: Colors.white),
+                    SizedBox(width: 10),
+                    Text("Logout", style: TextStyle(fontSize: 18, color: Colors.white)),
+                  ],
+                ),
+              ),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  /// 🏷️ Helper Function to Build Profile Rows
+  Widget _buildProfileRow(IconData icon, String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(
+        children: [
+          Icon(icon, color: Color(0xFF6D3A3F)), // Wine Red Icons
+          SizedBox(width: 10),
+          Text(label, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+          Spacer(),
+          Text(value, style: TextStyle(fontSize: 18, color: Colors.grey.shade700)),
+        ],
       ),
     );
   }

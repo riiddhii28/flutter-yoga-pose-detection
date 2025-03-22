@@ -32,30 +32,58 @@ class PoseGuideScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Yoga Pose Guide")),
-      body: ListView.builder(
-        padding: EdgeInsets.all(16),
-        itemCount: yogaPoses.length,
-        itemBuilder: (context, index) {
-          return Card(
-            elevation: 3,
-            margin: EdgeInsets.symmetric(vertical: 10),
-            child: ListTile(
-              contentPadding: EdgeInsets.all(16),
-              leading: Image.asset(
-                yogaPoses[index]["image"]!,
-                width: 50,
-                height: 50,
-                fit: BoxFit.cover,
+      backgroundColor: Color(0xFFF8F5F2), // Soft background color
+      appBar: AppBar(
+        title: Text("🧘 Pose Guide", style: TextStyle(color: Colors.white)),
+        backgroundColor: Color(0xFF6D3A3F), // Wine red theme
+        elevation: 0,
+      ),
+      body: Padding(
+        padding: EdgeInsets.all(12),
+        child: ListView.builder(
+          itemCount: yogaPoses.length,
+          itemBuilder: (context, index) {
+            return Card(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              elevation: 4,
+              margin: EdgeInsets.symmetric(vertical: 8),
+              child: Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: Image.asset(
+                        yogaPoses[index]["image"]!,
+                        width: 80,
+                        height: 80,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            yogaPoses[index]["name"]!,
+                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                          ),
+                          SizedBox(height: 6),
+                          Text(
+                            yogaPoses[index]["description"]!,
+                            style: TextStyle(fontSize: 14, color: Colors.black87),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              title: Text(
-                yogaPoses[index]["name"]!,
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              subtitle: Text(yogaPoses[index]["description"]!),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }

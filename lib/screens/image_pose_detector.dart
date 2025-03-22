@@ -14,7 +14,7 @@ class ImagePoseDetector extends StatefulWidget {
 class _ImagePoseDetectorState extends State<ImagePoseDetector> {
   File? _selectedImage;
   tfl.Interpreter? _interpreter;
-  String _detectedPose = "";
+  String _detectedPose = "No pose detected";
   double _accuracy = 0.0;
   final picker = ImagePicker();
 
@@ -43,7 +43,7 @@ class _ImagePoseDetectorState extends State<ImagePoseDetector> {
 
     setState(() {
       _selectedImage = File(pickedFile.path);
-      _detectedPose = "";
+      _detectedPose = "Detecting...";
       _accuracy = 0.0;
     });
 
@@ -135,14 +135,19 @@ class _ImagePoseDetectorState extends State<ImagePoseDetector> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Yoga Pose Detection")),
-      body: Center(
+      backgroundColor: Color(0xFFF8F5F2),
+      appBar: AppBar(
+        title: Text("🧘 Yoga Pose Detector", style: TextStyle(color: Colors.white)),
+        backgroundColor: Color(0xFF6D3A3F),
+        elevation: 0,
+      ),
+      body: Padding(
+        padding: EdgeInsets.all(16.0),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             if (_selectedImage != null)
               ClipRRect(
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(12),
                 child: Image.file(
                   _selectedImage!,
                   height: 300,
@@ -151,13 +156,30 @@ class _ImagePoseDetectorState extends State<ImagePoseDetector> {
                 ),
               )
             else
-              Text("No image selected", style: TextStyle(fontSize: 18)),
+              Container(
+                height: 300,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Center(
+                  child: Text("No image selected", style: TextStyle(fontSize: 18, color: Colors.black54)),
+                ),
+              ),
 
             SizedBox(height: 20),
 
-            ElevatedButton(
+            ElevatedButton.icon(
               onPressed: _pickImage,
-              child: Text("Pick Image"),
+              icon: Icon(Icons.photo_library),
+              label: Text("Pick Image"),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Color(0xFF6D3A3F),
+                foregroundColor: Colors.white,
+                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              ),
             ),
 
             SizedBox(height: 20),
