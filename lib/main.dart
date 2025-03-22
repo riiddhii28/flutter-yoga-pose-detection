@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
+import 'routes.dart'; // ✅ Import routes
 import 'screens/home_screen.dart';
-import 'screens/login_screen.dart'; 
+import 'screens/login_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(); // ✅ Initialize Firebase
+  await Firebase.initializeApp();
   runApp(MyApp());
 }
 
@@ -17,8 +17,36 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'YogaBliss',
-      theme: ThemeData(primarySwatch: Colors.blue),
-      home: AuthCheck(), 
+      theme: ThemeData(
+        primaryColor: Color(0xFFA89A8D), // Soft Taupe
+        scaffoldBackgroundColor: Color(0xFFE9E8E7), // Light Beige
+        textTheme: TextTheme(
+          bodyLarge: TextStyle(color: Color(0xFF1D1B1A)), // Dark Charcoal
+          bodyMedium: TextStyle(color: Color(0xFF1D1B1A)),
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Color(0xFF6D3A3F), // Muted Wine Red
+            foregroundColor: Colors.white, // White Text
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+        ),
+        appBarTheme: AppBarTheme(
+          backgroundColor: Color(0xFFA89A8D), // Primary Color
+          titleTextStyle: TextStyle(
+            color: Colors.white,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+          iconTheme: IconThemeData(color: Colors.white),
+        ),
+      ),
+      home: AuthCheck(),
+
+      // ✅ Use the routes from routes.dart
+      routes: getAppRoutes(),
     );
   }
 }
@@ -31,7 +59,22 @@ class AuthCheck extends StatelessWidget {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Scaffold(
-            body: Center(child: CircularProgressIndicator()), // ✅ Show loading indicator
+            backgroundColor: Color(0xFFE9E8E7), // Light Background
+            body: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Image.asset("assets/images/yoga_loader.png", height: 100), // Placeholder Image
+                  SizedBox(height: 20),
+                  CircularProgressIndicator(color: Color(0xFF6D3A3F)), // Themed Loader
+                  SizedBox(height: 10),
+                  Text(
+                    "Loading YogaBliss...",
+                    style: TextStyle(fontSize: 16, color: Color(0xFF1D1B1A)),
+                  ),
+                ],
+              ),
+            ),
           );
         }
 
