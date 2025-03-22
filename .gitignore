@@ -51,3 +51,5 @@ migrate_working_dir/
 # 🔥 Firebase Emulator Data (Exclude if using Firebase Emulator)
 firebase-debug.log
 .firestore/
+
+assets/
