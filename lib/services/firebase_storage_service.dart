@@ -5,16 +5,21 @@ import 'package:path/path.dart';
 class FirebaseStorageService {
   final FirebaseStorage _storage = FirebaseStorage.instance;
 
-  /// Uploads an image file to Firebase Storage
-  Future<String> uploadImage(File imageFile, String userId) async {
+  /// 📤 Upload Image to Firebase Storage
+  Future<String> uploadImage(File imageFile, String folderName) async {
     try {
       String fileName = basename(imageFile.path);
-      Reference ref = _storage.ref("user_poses/$userId/$fileName");
-      UploadTask uploadTask = ref.putFile(imageFile);
+      Reference storageRef = _storage.ref().child("$folderName/$fileName");
+
+      UploadTask uploadTask = storageRef.putFile(imageFile);
       TaskSnapshot snapshot = await uploadTask;
-      return await snapshot.ref.getDownloadURL(); // Return the image URL
+
+      // ✅ Get Download URL
+      String downloadUrl = await snapshot.ref.getDownloadURL();
+      return downloadUrl;
     } catch (e) {
-      throw Exception("Failed to upload image: $e");
+      print("Error uploading image: $e");
+      return "";
     }
   }
 }

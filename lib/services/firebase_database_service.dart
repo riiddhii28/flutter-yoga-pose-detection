@@ -14,14 +14,15 @@ class FirebaseDatabaseService {
   }
 
   /// 📜 Save pose detection history & update highest accuracy
-  Future<void> savePoseHistory(String uid, String poseName, double accuracy) async {
+  Future<void> savePoseHistory(String uid, String poseName, double accuracy, String imageUrl) async {
     await _db.collection("users").doc(uid).collection("pose_history").add({
       "poseName": poseName,
       "accuracy": accuracy,
+      "imageUrl": imageUrl,
       "timestamp": Timestamp.now(),
     });
 
-    // Update user's highest accuracy
+    // Update highest accuracy
     DocumentSnapshot userDoc = await _db.collection("users").doc(uid).get();
     double currentHighest = userDoc['highestAccuracy'] ?? 0.0;
 
@@ -46,8 +47,9 @@ class FirebaseDatabaseService {
     return doc.exists ? doc.data() as Map<String, dynamic> : {};
   }
 
-  /// 🖼 Update profile image URL
-  Future<void> updateUserProfileImage(String uid, String imageUrl) async {
-    await _db.collection("users").doc(uid).update({"profileImageUrl": imageUrl});
+  /// 🖼 Update Profile Picture URL
+  Future<void> updateProfilePicture(String uid, String imageUrl) async {
+    await _db.collection("users").doc(uid).update({"profilePic": imageUrl});
   }
+
 }

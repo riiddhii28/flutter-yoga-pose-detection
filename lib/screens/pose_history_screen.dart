@@ -19,17 +19,43 @@ class _PoseHistoryScreenState extends State<PoseHistoryScreen> {
       body: StreamBuilder<QuerySnapshot>(
         stream: _dbService.getPoseHistory(_auth.currentUser!.uid),
         builder: (context, snapshot) {
-          if (!snapshot.hasData) return Center(child: CircularProgressIndicator());
+          if (!snapshot.hasData) {
+            return Center(child: CircularProgressIndicator());
+          }
 
           final poses = snapshot.data!.docs;
+          if (poses.isEmpty) {
+            return Center(
+              child: Text("No pose history found.",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+            );
+          }
+
           return ListView.builder(
             itemCount: poses.length,
             itemBuilder: (context, index) {
               var poseData = poses[index];
-              return ListTile(
-                title: Text("Pose: ${poseData['poseName']}"),
-                subtitle: Text("Accuracy: ${(poseData['accuracy'] * 100).toStringAsFixed(1)}%"),
-                trailing: Text(poseData['timestamp'].toDate().toString().split('.')[0]),
+              String poseName = poseData['poseName'];
+              double accuracy = poseData['accuracy'] * 100;
+              String timestamp = poseData['timestamp'].toDate().toString().split('.')[0];
+              String? imageUrl = poseData['imageUrl']; // ✅ Get pose image URL
+
+              return Card(
+                margin: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                child: ListTile(
+                  leading: imageUrl != null && imageUrl.isNotEmpty
+                      ? Image.network(imageUrl, width: 50, height: 50, fit: BoxFit.cover)
+                      : Icon(Icons.image_not_supported, size: 50, color: Colors.grey),
+                  title: Text("Pose: $poseName", style: TextStyle(fontWeight: FontWeight.bold)),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text("Accuracy: ${accuracy.toStringAsFixed(1)}%"),
+                      Text("Time: $timestamp", style: TextStyle(color: Colors.grey)),
+                    ],
+                  ),
+                ),
               );
             },
           );

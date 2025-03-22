@@ -7,26 +7,17 @@
 .pub/
 build/
 
-# iOS build artifacts
+# iOS build artifacts (Keep essential files, remove unnecessary ones)
 ios/Flutter/.last_build_id
-ios/Pods/
 ios/Runner.xcworkspace/
-ios/build/
 
-# Android build artifacts
-android/.gradle/
+# Android build artifacts (Keep essential files, remove unnecessary ones)
 android/local.properties
-android/app/debug
-android/app/profile
-android/app/release
-
-# Additional Android build cache folder
 android/app/.cxx/
 
 # IDEs and Editors
 *.iml
 .idea/
-.vscode/
 
 # macOS specific
 .DS_Store
@@ -43,9 +34,6 @@ android/app/.cxx/
 .svn/
 .swiftpm/
 migrate_working_dir/
-
-# Optionally, exclude assets if you do not want them tracked
-assets/
 
 # 🔥 Firebase-Specific Files (DO NOT PUSH THESE)
 **/firebase_service_account.json

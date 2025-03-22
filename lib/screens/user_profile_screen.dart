@@ -1,10 +1,9 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:image_picker/image_picker.dart';
-import '../services/firebase_database_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../services/firebase_storage_service.dart';
-import 'login_screen.dart';
+import '../services/firebase_database_service.dart';
 
 class UserProfileScreen extends StatefulWidget {
   @override
@@ -18,14 +17,15 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   String email = "";
   double highestAccuracy = 0.0;
   String joinDate = "";
-  String profileImageUrl = "";
-
+  String profilePicUrl = "";
+  
   @override
   void initState() {
     super.initState();
     _fetchUserProfile();
   }
 
+  /// 📤 Fetch User Details
   Future<void> _fetchUserProfile() async {
     var user = _auth.currentUser;
     if (user != null) {
@@ -34,31 +34,32 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
         email = userData['email'];
         highestAccuracy = userData['highestAccuracy'];
         joinDate = userData['createdAt'].toDate().toString().split(' ')[0];
-        profileImageUrl = userData['profileImageUrl'] ?? ""; // Get profile image
+        profilePicUrl = userData['profilePic'] ?? "";
       });
     }
   }
 
-  Future<void> _pickAndUploadImage() async {
+  /// 📸 Pick & Upload Profile Picture
+  Future<void> _uploadProfilePicture() async {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
 
     if (pickedFile != null) {
       File imageFile = File(pickedFile.path);
-      var user = _auth.currentUser;
-      if (user != null) {
-        String downloadUrl = await _storageService.uploadImage(imageFile, user.uid);
-        await _dbService.updateUserProfileImage(user.uid, downloadUrl);
-        setState(() {
-          profileImageUrl = downloadUrl;
-        });
+      String downloadUrl = await _storageService.uploadImage(imageFile, "profile_pictures");
+
+      if (downloadUrl.isNotEmpty) {
+        var user = _auth.currentUser;
+        await _dbService.updateProfilePicture(user!.uid, downloadUrl);
+        setState(() => profilePicUrl = downloadUrl);
       }
     }
   }
 
+  /// 🚪 Logout User
   void _logout() async {
     await _auth.signOut();
-    Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => LoginScreen()));
+    Navigator.pushReplacementNamed(context, "/login");
   }
 
   @override
@@ -69,13 +70,14 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            profileImageUrl.isNotEmpty
-                ? CircleAvatar(radius: 50, backgroundImage: NetworkImage(profileImageUrl))
-                : Icon(Icons.account_circle, size: 100, color: Colors.blueAccent),
-            SizedBox(height: 10),
-            ElevatedButton(
-              onPressed: _pickAndUploadImage,
-              child: Text("Upload Profile Picture"),
+            GestureDetector(
+              onTap: _uploadProfilePicture,
+              child: CircleAvatar(
+                radius: 50,
+                backgroundImage: profilePicUrl.isNotEmpty
+                    ? NetworkImage(profilePicUrl)
+                    : AssetImage("assets/images/default_avatar.png") as ImageProvider,
+              ),
             ),
             SizedBox(height: 20),
             Text("Email: $email", style: TextStyle(fontSize: 18)),
@@ -88,7 +90,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
               onPressed: _logout,
               icon: Icon(Icons.logout),
               label: Text("Logout"),
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white),
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
             ),
           ],
         ),

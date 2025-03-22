@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'login_screen.dart';
 
 class HomeScreen extends StatelessWidget {
+  final FirebaseAuth _auth = FirebaseAuth.instance; // ✅ Firebase Auth instance
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text("YogaBliss 🧘‍♂️")),
-      drawer: _buildDrawer(context), // Side navigation drawer
+      drawer: _buildDrawer(context), // ✅ Updated drawer with logout
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
@@ -81,7 +85,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  /// 📜 Drawer for Navigation
+  /// 📜 Drawer for Navigation (Updated with Logout)
   Widget _buildDrawer(BuildContext context) {
     return Drawer(
       child: ListView(
@@ -104,6 +108,8 @@ class HomeScreen extends StatelessWidget {
           _buildDrawerItem(context, Icons.leaderboard, "Leaderboard", "/leaderboard"),
           _buildDrawerItem(context, Icons.person, "My Profile", "/profile"),
           _buildDrawerItem(context, Icons.info_outline, "About", "/about"),
+          Divider(), // ✅ Separate logout option
+          _buildDrawerItem(context, Icons.logout, "Logout", null, isLogout: true),
         ],
       ),
     );
@@ -126,13 +132,18 @@ class HomeScreen extends StatelessWidget {
   }
 
   /// 📌 Drawer Item (For Sidebar Navigation)
-  Widget _buildDrawerItem(BuildContext context, IconData icon, String title, String route) {
+  Widget _buildDrawerItem(BuildContext context, IconData icon, String title, String? route, {bool isLogout = false}) {
     return ListTile(
-      leading: Icon(icon, color: Colors.blueAccent),
+      leading: Icon(icon, color: isLogout ? Colors.red : Colors.blueAccent),
       title: Text(title, style: TextStyle(fontSize: 16)),
-      onTap: () {
-        Navigator.pop(context);
-        Navigator.pushNamed(context, route);
+      onTap: () async {
+        if (isLogout) {
+          await _auth.signOut(); // ✅ Sign out
+          Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => LoginScreen()));
+        } else {
+          Navigator.pop(context);
+          if (route != null) Navigator.pushNamed(context, route);
+        }
       },
     );
   }
