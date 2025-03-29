@@ -12,11 +12,6 @@ class ResultDisplay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // If no pose is detected, show nothing
-    if (poseName.isEmpty) {
-      return SizedBox(); // Empty widget
-    }
-
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: Card(
@@ -39,35 +34,46 @@ class ResultDisplay extends StatelessWidget {
                 ),
               ),
               SizedBox(height: 8),
+
               Text(
-                poseName,
+                poseName, // Always show the pose name
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.w600,
-                  color: Color(0xFF6D3A3F), // Wine Red
+                  color: poseName == "No pose detected"
+                      ? Colors.redAccent // Highlight for no detection
+                      : Color(0xFF6D3A3F), // Wine Red for valid poses
                 ),
                 textAlign: TextAlign.center,
               ),
+
               SizedBox(height: 8),
-              Text(
-                "Accuracy: ${(accuracy * 100).toStringAsFixed(1)}%", // Display accuracy
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w500,
-                  color: Color(0xFFA89A8D), // Taupe
+
+              // ✅ Show accuracy only for valid poses
+              if (poseName != "No pose detected" && poseName != "UnknownPose")
+                Column(
+                  children: [
+                    Text(
+                      "Accuracy: ${(accuracy * 100).toStringAsFixed(1)}%", // Display accuracy
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w500,
+                        color: Color(0xFFA89A8D), // Taupe
+                      ),
+                    ),
+                    SizedBox(height: 16),
+                    // Animated accuracy bar
+                    AnimatedContainer(
+                      duration: Duration(milliseconds: 500),
+                      width: accuracy * 200, // Width based on accuracy
+                      height: 10,
+                      decoration: BoxDecoration(
+                        color: Color(0xFF6D3A3F), // Wine Red
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-              SizedBox(height: 16),
-              // Animated accuracy bar
-              AnimatedContainer(
-                duration: Duration(milliseconds: 500),
-                width: accuracy * 200, // Width based on accuracy
-                height: 10,
-                decoration: BoxDecoration(
-                  color: Color(0xFF6D3A3F), // Wine Red
-                  borderRadius: BorderRadius.circular(5),
-                ),
-              ),
             ],
           ),
         ),

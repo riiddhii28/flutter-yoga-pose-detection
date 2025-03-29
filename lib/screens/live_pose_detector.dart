@@ -3,7 +3,6 @@ import 'package:camera/camera.dart';
 import 'package:tflite_flutter/tflite_flutter.dart' as tfl;
 import 'package:flutter/services.dart';
 import 'package:image/image.dart' as img;
-import '../widgets/result_display.dart';
 
 class LivePoseDetector extends StatefulWidget {
   @override
@@ -14,7 +13,7 @@ class _LivePoseDetectorState extends State<LivePoseDetector> {
   CameraController? _cameraController;
   late List<CameraDescription> _cameras;
   tfl.Interpreter? _interpreter;
-  String _detectedPose = "No pose detected";
+  String _detectedPose = "No Pose Detected";
   double _confidence = 0.0;
   bool _isDetecting = false;
 
@@ -44,7 +43,7 @@ class _LivePoseDetectorState extends State<LivePoseDetector> {
         if (!_isDetecting) {
           _isDetecting = true;
           _detectPose(image).then((_) {
-            Future.delayed(Duration(milliseconds: 300), () { // 🔹 Process every 300ms
+            Future.delayed(Duration(milliseconds: 300), () { 
               _isDetecting = false;
             });
           });
@@ -53,16 +52,6 @@ class _LivePoseDetectorState extends State<LivePoseDetector> {
     } catch (e) {
       print("❌ Error initializing camera: $e");
     }
-  }
-
-  /// ✅ Fix Camera Rotation
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown,
-    ]);
   }
 
   /// ✅ Load TensorFlow Lite Model
@@ -77,19 +66,20 @@ class _LivePoseDetectorState extends State<LivePoseDetector> {
 
   /// 🤖 Run Pose Detection on Live Camera Frame
   Future<void> _detectPose(CameraImage image) async {
-    if (_interpreter == null) return;
-    if (!mounted) return;
+    if (_interpreter == null || !mounted) return;
 
     try {
       List<List<List<List<double>>>> input = _preprocessImage(image);
-
       var output = List.filled(6, 0.0).reshape([1, 6]);
 
       print("✅ Running inference...");
       _interpreter!.run(input, output);
+      print("📊 Model Output: $output");
 
       int maxIndex = 0;
       double maxConfidence = 0.0;
+
+      // ✅ Find the highest confidence value
       for (int i = 1; i < output[0].length; i++) {
         if (output[0][i] > maxConfidence) {
           maxConfidence = output[0][i];
@@ -99,9 +89,25 @@ class _LivePoseDetectorState extends State<LivePoseDetector> {
 
       List<String> poseLabels = ["Downdog", "Goddess", "Plank", "Tree", "Warrior2", "UnknownPose"];
 
+      String detectedPose;
+      
+      // ✅ If confidence is very low (<10%), show "No Pose Detected"
+      if (maxConfidence < 0.1) {
+        detectedPose = "No Pose Detected";
+        maxConfidence = 0.0;
+      } 
+      // ✅ If confidence is below 60%, classify as "Unknown Pose"
+      else if (maxConfidence < 0.6) {
+        detectedPose = "Unknown Pose";
+      } 
+      // ✅ Otherwise, use the detected pose
+      else {
+        detectedPose = poseLabels[maxIndex];
+      }
+
       if (mounted) {
         setState(() {
-          _detectedPose = poseLabels[maxIndex];
+          _detectedPose = detectedPose;
           _confidence = maxConfidence;
         });
       }
@@ -115,13 +121,9 @@ class _LivePoseDetectorState extends State<LivePoseDetector> {
   /// 📏 Preprocess Image (Convert & Normalize)
   List<List<List<List<double>>>> _preprocessImage(CameraImage image) {
     try {
-      // Convert CameraImage to a usable format
       img.Image imgImage = _convertYUV420ToImage(image);
-
-      // Resize image to model input size (224x224)
       img.Image resizedImage = img.copyResize(imgImage, width: 224, height: 224);
 
-      // Convert image to normalized tensor
       List<List<List<List<double>>>> input = [
         List.generate(
           224,
@@ -147,43 +149,36 @@ class _LivePoseDetectorState extends State<LivePoseDetector> {
     }
   }
 
+  /// 🖼 Convert CameraImage (YUV420) to RGB Image
+  img.Image _convertYUV420ToImage(CameraImage image) {
+    int width = image.width;
+    int height = image.height;
 
-/// 🖼 Convert CameraImage (YUV420) to RGB Image
-img.Image _convertYUV420ToImage(CameraImage image) {
-  int width = image.width;
-  int height = image.height;
+    var yBuffer = image.planes[0].bytes;
+    var uBuffer = image.planes[1].bytes;
+    var vBuffer = image.planes[2].bytes;
 
-  var yBuffer = image.planes[0].bytes;
-  var uBuffer = image.planes[1].bytes;
-  var vBuffer = image.planes[2].bytes;
+    var imgData = img.Image(width: width, height: height);
 
-  // ✅ Correctly Initialize Image
-  var imgData = img.Image(width: width, height: height);
+    int yIndex = 0;
+    int uvIndex = 0;
 
-  int yIndex = 0;
-  int uvIndex = 0;
+    for (int y = 0; y < height; y++) {
+      for (int x = 0; x < width; x++) {
+        int yValue = yBuffer[yIndex++] & 0xFF;
+        int uValue = uBuffer[uvIndex] & 0xFF;
+        int vValue = vBuffer[uvIndex] & 0xFF;
+        if (x % 2 == 1) uvIndex++;
 
-  for (int y = 0; y < height; y++) {
-    for (int x = 0; x < width; x++) {
-      int yValue = yBuffer[yIndex++] & 0xFF;
-      int uValue = uBuffer[uvIndex] & 0xFF;
-      int vValue = vBuffer[uvIndex] & 0xFF;
-      if (x % 2 == 1) uvIndex++;
+        int r = (yValue + 1.370705 * (vValue - 128)).clamp(0, 255).toInt();
+        int g = (yValue - 0.698001 * (vValue - 128) - 0.337633 * (uValue - 128)).clamp(0, 255).toInt();
+        int b = (yValue + 1.732446 * (uValue - 128)).clamp(0, 255).toInt();
 
-      // Convert YUV to RGB
-      int r = (yValue + 1.370705 * (vValue - 128)).clamp(0, 255).toInt();
-      int g = (yValue - 0.698001 * (vValue - 128) - 0.337633 * (uValue - 128)).clamp(0, 255).toInt();
-      int b = (yValue + 1.732446 * (uValue - 128)).clamp(0, 255).toInt();
-
-      // ✅ Use setPixelRgb Instead of setPixel
-      imgData.setPixelRgb(x, y, r, g, b);
+        imgData.setPixelRgb(x, y, r, g, b);
+      }
     }
+    return imgData;
   }
-  return imgData;
-}
-
-
-
 
   @override
   void dispose() {
@@ -220,7 +215,7 @@ img.Image _convertYUV420ToImage(CameraImage image) {
                 ),
                 SizedBox(height: 10),
                 Text(
-                  "Confidence: ${(_confidence * 100).toStringAsFixed(1)}%",
+                  _confidence > 0 ? "Confidence: ${(_confidence * 100).toStringAsFixed(1)}%" : "",
                   style: TextStyle(fontSize: 18, color: Colors.white),
                 ),
               ],
