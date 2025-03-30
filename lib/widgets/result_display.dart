@@ -12,6 +12,8 @@ class ResultDisplay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    bool isUnknownOrNoPose = poseName == "No pose detected" || poseName == "UnknownPose";
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: Card(
@@ -30,50 +32,44 @@ class ResultDisplay extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF1D1B1A), // Dark Charcoal
+                  color: Color(0xFF1D1B1A),
                 ),
               ),
               SizedBox(height: 8),
 
               Text(
-                poseName, // Always show the pose name
+                poseName,
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.w600,
-                  color: poseName == "No pose detected"
-                      ? Colors.redAccent // Highlight for no detection
+                  color: isUnknownOrNoPose
+                      ? Colors.redAccent
                       : Color(0xFF6D3A3F), // Wine Red for valid poses
                 ),
                 textAlign: TextAlign.center,
               ),
 
-              SizedBox(height: 8),
-
-              // ✅ Show accuracy only for valid poses
-              if (poseName != "No pose detected" && poseName != "UnknownPose")
-                Column(
-                  children: [
-                    Text(
-                      "Accuracy: ${(accuracy * 100).toStringAsFixed(1)}%", // Display accuracy
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w500,
-                        color: Color(0xFFA89A8D), // Taupe
-                      ),
-                    ),
-                    SizedBox(height: 16),
-                    // Animated accuracy bar
-                    AnimatedContainer(
-                      duration: Duration(milliseconds: 500),
-                      width: accuracy * 200, // Width based on accuracy
-                      height: 10,
-                      decoration: BoxDecoration(
-                        color: Color(0xFF6D3A3F), // Wine Red
-                        borderRadius: BorderRadius.circular(5),
-                      ),
-                    ),
-                  ],
+              if (!isUnknownOrNoPose) ...[
+                SizedBox(height: 8),
+                Text(
+                  "Accuracy: ${(accuracy * 100).toStringAsFixed(1)}%",
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w500,
+                    color: Color(0xFFA89A8D), // Taupe
+                  ),
                 ),
+                SizedBox(height: 16),
+                AnimatedContainer(
+                  duration: Duration(milliseconds: 500),
+                  width: (accuracy * 200).clamp(10.0, 200.0), // Min width 10px
+                  height: 10,
+                  decoration: BoxDecoration(
+                    color: Color(0xFF6D3A3F), // Wine Red
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                ),
+              ],
             ],
           ),
         ),

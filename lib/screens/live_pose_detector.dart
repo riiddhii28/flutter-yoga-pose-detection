@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:tflite_flutter/tflite_flutter.dart' as tfl;
-import 'package:flutter/services.dart';
+import 'dart:typed_data';
 import 'package:image/image.dart' as img;
+import 'dart:math' as math;
+import '../widgets/skeleton_overlay.dart';
 
 class LivePoseDetector extends StatefulWidget {
   @override
@@ -11,180 +13,141 @@ class LivePoseDetector extends StatefulWidget {
 
 class _LivePoseDetectorState extends State<LivePoseDetector> {
   CameraController? _cameraController;
-  late List<CameraDescription> _cameras;
-  tfl.Interpreter? _interpreter;
-  String _detectedPose = "No Pose Detected";
-  double _confidence = 0.0;
   bool _isDetecting = false;
+  tfl.Interpreter? _movenetInterpreter;
+  tfl.Interpreter? _classifierInterpreter;
+  List<List<double>> keypoints = [];
+  String _poseResult = "No Pose Detected";
 
   @override
   void initState() {
     super.initState();
     _initializeCamera();
-    _loadModel();
+    _loadModels();
   }
 
-  /// 📸 Initialize Camera
   Future<void> _initializeCamera() async {
+    final cameras = await availableCameras();
+    final backCamera = cameras.first;
+
+    _cameraController = CameraController(backCamera, ResolutionPreset.medium);
+    await _cameraController!.initialize();
+    if (!mounted) return;
+
+    setState(() {});
+    _startPoseDetection();
+  }
+
+  Future<void> _loadModels() async {
     try {
-      _cameras = await availableCameras();
-      _cameraController = CameraController(
-        _cameras[0], // Use first available camera
-        ResolutionPreset.medium,
-        enableAudio: false,
-      );
+      _movenetInterpreter =
+          await tfl.Interpreter.fromAsset('assets/movenet_thunder.tflite');
+      _classifierInterpreter =
+          await tfl.Interpreter.fromAsset('assets/yoga_pose_classifier.tflite');
+      print("✅ TFLite Models Loaded!");
+    } catch (e) {
+      print("❌ Error loading models: $e");
+    }
+  }
 
-      await _cameraController!.initialize();
-      if (!mounted) return;
+  void _startPoseDetection() {
+    _cameraController?.startImageStream((CameraImage image) {
+      if (!_isDetecting) {
+        _isDetecting = true;
+        _runPoseDetection(image).then((_) => _isDetecting = false);
+      }
+    });
+  }
 
-      setState(() {});
+  Future<void> _runPoseDetection(CameraImage image) async {
+    if (_movenetInterpreter == null || _classifierInterpreter == null) return;
 
-      _cameraController!.startImageStream((CameraImage image) {
-        if (!_isDetecting) {
-          _isDetecting = true;
-          _detectPose(image).then((_) {
-            Future.delayed(Duration(milliseconds: 300), () { 
-              _isDetecting = false;
-            });
-          });
-        }
+    try {
+      img.Image convertedImage = _convertCameraImage(image);
+      Float32List input = _processImage(convertedImage);
+
+      List<List<double>> output =
+          List.generate(1, (index) => List.filled(17 * 3, 0.0));
+      _movenetInterpreter!.run(input, output);
+
+      setState(() {
+        keypoints = output;
+        _poseResult = _classifyPose(output);
       });
     } catch (e) {
-      print("❌ Error initializing camera: $e");
+      print("❌ Error in pose detection: $e");
     }
   }
 
-  /// ✅ Load TensorFlow Lite Model
-  Future<void> _loadModel() async {
-    try {
-      _interpreter = await tfl.Interpreter.fromAsset("assets/yoga_pose_classifier.tflite");
-      print("✅ Model loaded successfully!");
-    } catch (e) {
-      print("❌ Error loading model: $e");
-    }
+  String _classifyPose(List<List<double>> keypoints) {
+    if (_classifierInterpreter == null) return "Model Not Loaded";
+
+    List<List<double>> output =
+        List.generate(1, (index) => List.filled(5, 0.0));
+    _classifierInterpreter!.run(keypoints, output);
+
+    List<String> poseLabels = [
+      "Downdog",
+      "Goddess",
+      "Plank",
+      "Tree",
+      "Warrior2"
+    ];
+    int maxIndex = output[0].indexOf(output[0].reduce(math.max));
+
+    return poseLabels[maxIndex];
   }
 
-  /// 🤖 Run Pose Detection on Live Camera Frame
-  Future<void> _detectPose(CameraImage image) async {
-    if (_interpreter == null || !mounted) return;
+  /// Converts YUV420 CameraImage to an RGB `img.Image`
+  img.Image _convertCameraImage(CameraImage image) {
+    final int width = image.width;
+    final int height = image.height;
+    img.Image imgBuffer = img.Image(width: width, height: height);
 
-    try {
-      List<List<List<List<double>>>> input = _preprocessImage(image);
-      var output = List.filled(6, 0.0).reshape([1, 6]);
+    final Uint8List yBuffer = image.planes[0].bytes;
+    final Uint8List uBuffer = image.planes[1].bytes;
+    final Uint8List vBuffer = image.planes[2].bytes;
 
-      print("✅ Running inference...");
-      _interpreter!.run(input, output);
-      print("📊 Model Output: $output");
-
-      int maxIndex = 0;
-      double maxConfidence = 0.0;
-
-      // ✅ Find the highest confidence value
-      for (int i = 1; i < output[0].length; i++) {
-        if (output[0][i] > maxConfidence) {
-          maxConfidence = output[0][i];
-          maxIndex = i - 1;
-        }
-      }
-
-      List<String> poseLabels = ["Downdog", "Goddess", "Plank", "Tree", "Warrior2", "UnknownPose"];
-
-      String detectedPose;
-      
-      // ✅ If confidence is very low (<10%), show "No Pose Detected"
-      if (maxConfidence < 0.1) {
-        detectedPose = "No Pose Detected";
-        maxConfidence = 0.0;
-      } 
-      // ✅ If confidence is below 60%, classify as "Unknown Pose"
-      else if (maxConfidence < 0.6) {
-        detectedPose = "Unknown Pose";
-      } 
-      // ✅ Otherwise, use the detected pose
-      else {
-        detectedPose = poseLabels[maxIndex];
-      }
-
-      if (mounted) {
-        setState(() {
-          _detectedPose = detectedPose;
-          _confidence = maxConfidence;
-        });
-      }
-
-      print("🧘 Pose Detected: $_detectedPose (Confidence: ${(_confidence * 100).toStringAsFixed(1)}%)");
-    } catch (e) {
-      print("❌ Error detecting pose: $e");
-    }
-  }
-
-  /// 📏 Preprocess Image (Convert & Normalize)
-  List<List<List<List<double>>>> _preprocessImage(CameraImage image) {
-    try {
-      img.Image imgImage = _convertYUV420ToImage(image);
-      img.Image resizedImage = img.copyResize(imgImage, width: 224, height: 224);
-
-      List<List<List<List<double>>>> input = [
-        List.generate(
-          224,
-          (y) => List.generate(
-            224,
-            (x) {
-              img.Color pixel = resizedImage.getPixel(x, y);
-              return [
-                pixel.r / 255.0,
-                pixel.g / 255.0,
-                pixel.b / 255.0
-              ];
-            },
-          ),
-        )
-      ];
-      return input;
-    } catch (e) {
-      print("❌ Error preprocessing image: $e");
-      return [
-        List.generate(224, (_) => List.generate(224, (_) => List.generate(3, (_) => 0.0)))
-      ];
-    }
-  }
-
-  /// 🖼 Convert CameraImage (YUV420) to RGB Image
-  img.Image _convertYUV420ToImage(CameraImage image) {
-    int width = image.width;
-    int height = image.height;
-
-    var yBuffer = image.planes[0].bytes;
-    var uBuffer = image.planes[1].bytes;
-    var vBuffer = image.planes[2].bytes;
-
-    var imgData = img.Image(width: width, height: height);
-
-    int yIndex = 0;
-    int uvIndex = 0;
+    final int uvRowStride = image.planes[1].bytesPerRow;
+    final int uvPixelStride = image.planes[1].bytesPerPixel!;
 
     for (int y = 0; y < height; y++) {
       for (int x = 0; x < width; x++) {
-        int yValue = yBuffer[yIndex++] & 0xFF;
-        int uValue = uBuffer[uvIndex] & 0xFF;
-        int vValue = vBuffer[uvIndex] & 0xFF;
-        if (x % 2 == 1) uvIndex++;
+        final int uvIndex = uvPixelStride * (x ~/ 2) + uvRowStride * (y ~/ 2);
+        final int index = y * width + x;
 
-        int r = (yValue + 1.370705 * (vValue - 128)).clamp(0, 255).toInt();
-        int g = (yValue - 0.698001 * (vValue - 128) - 0.337633 * (uValue - 128)).clamp(0, 255).toInt();
-        int b = (yValue + 1.732446 * (uValue - 128)).clamp(0, 255).toInt();
+        final int yPixel = yBuffer[index];
+        final int uPixel = uBuffer[uvIndex] - 128;
+        final int vPixel = vBuffer[uvIndex] - 128;
 
-        imgData.setPixelRgb(x, y, r, g, b);
+        int r = (yPixel + 1.402 * vPixel).round();
+        int g = (yPixel - 0.344136 * uPixel - 0.714136 * vPixel).round();
+        int b = (yPixel + 1.772 * uPixel).round();
+
+        r = r.clamp(0, 255);
+        g = g.clamp(0, 255);
+        b = b.clamp(0, 255);
+
+        imgBuffer.setPixel(x, y, img.ColorInt8.rgb(r, g, b));
       }
     }
-    return imgData;
+
+    return img.copyResize(imgBuffer, width: 192, height: 192);
+  }
+
+  /// Converts `img.Image` to Float32List for TFLite input
+  Float32List _processImage(img.Image image) {
+    img.Image grayscaleImage = img.grayscale(image);
+    List<int> pixels = grayscaleImage.getBytes(order: img.ChannelOrder.rgb);
+
+    return Float32List.fromList(pixels.map((p) => p / 255.0).toList());
   }
 
   @override
   void dispose() {
-    _cameraController?.stopImageStream();
     _cameraController?.dispose();
-    _interpreter?.close();
+    _movenetInterpreter?.close();
+    _classifierInterpreter?.close();
     super.dispose();
   }
 
@@ -192,37 +155,26 @@ class _LivePoseDetectorState extends State<LivePoseDetector> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text("Live Pose Detection")),
-      body: Stack(
-        children: [
-          // 🎥 Camera Preview (Full Screen)
-          Positioned.fill(
-            child: _cameraController != null && _cameraController!.value.isInitialized
-                ? CameraPreview(_cameraController!)
-                : Center(child: CircularProgressIndicator()),
-          ),
-
-          // 📊 Overlay for Pose Detection Result
-          Positioned(
-            bottom: 50,
-            left: 0,
-            right: 0,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+      body: _cameraController == null || !_cameraController!.value.isInitialized
+          ? Center(child: CircularProgressIndicator())
+          : Stack(
               children: [
-                Text(
-                  _detectedPose,
-                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white),
-                ),
-                SizedBox(height: 10),
-                Text(
-                  _confidence > 0 ? "Confidence: ${(_confidence * 100).toStringAsFixed(1)}%" : "",
-                  style: TextStyle(fontSize: 18, color: Colors.white),
+                CameraPreview(_cameraController!),
+                SkeletonOverlay(keypoints: keypoints), // Overlay Skeleton
+                Positioned(
+                  bottom: 20,
+                  left: 20,
+                  child: Container(
+                    padding: EdgeInsets.all(8),
+                    color: Colors.black54,
+                    child: Text(
+                      _poseResult,
+                      style: TextStyle(color: Colors.white, fontSize: 18),
+                    ),
+                  ),
                 ),
               ],
             ),
-          ),
-        ],
-      ),
     );
   }
 }

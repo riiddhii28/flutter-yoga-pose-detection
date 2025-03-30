@@ -29,8 +29,6 @@ class _ImagePoseDetectorState extends State<ImagePoseDetector> {
     try {
       _interpreter = await tfl.Interpreter.fromAsset("assets/yoga_pose_classifier.tflite");
       print("✅ Model loaded successfully!");
-      print("📌 Model Input Shape: ${_interpreter!.getInputTensor(0).shape}");
-      print("📌 Model Output Shape: ${_interpreter!.getOutputTensor(0).shape}");
     } catch (e) {
       print("❌ Error loading model: $e");
     }
@@ -50,68 +48,65 @@ class _ImagePoseDetectorState extends State<ImagePoseDetector> {
     await _detectPose();
   }
 
-/// 🔍 Detect Pose (With "Unknown Pose" and "No Pose" Handling)
-Future<void> _detectPose() async {
-  if (_selectedImage == null || _interpreter == null) {
-    setState(() {
-      _detectedPose = "Error in detection";
-      _accuracy = 0.0;
-    });
-    return;
-  }
+  /// 🔍 Detect Pose (With "No Pose Detected" Handling)
+  Future<void> _detectPose() async {
+    if (_selectedImage == null || _interpreter == null) {
+      setState(() {
+        _detectedPose = "Error in detection";
+        _accuracy = 0.0;
+      });
+      return;
+    }
 
-  try {
-    print("📸 Image Selected: ${_selectedImage!.path}");
+    try {
+      print("📸 Image Selected: ${_selectedImage!.path}");
 
-    List<List<List<List<double>>>> input = await _preprocessImage(_selectedImage!);
-    var output = List.filled(6, 0.0).reshape([1, 6]);
+      List<List<List<List<double>>>> input = await _preprocessImage(_selectedImage!);
+      var output = List.filled(6, 0.0).reshape([1, 6]);
 
-    print("✅ Running inference...");
-    _interpreter!.run(input, output);
-    print("📊 Model Output: $output");
+      print("✅ Running inference...");
+      _interpreter!.run(input, output);
+      print("📊 Model Output: $output");
 
-    int maxIndex = 0;
-    double maxAccuracy = 0.0;
+      int maxIndex = 0;
+      double maxAccuracy = 0.0;
 
-    // ✅ Fix indexing issue
-    for (int i = 1; i < output[0].length; i++) {  
-      if (output[0][i] > maxAccuracy) {
-        maxAccuracy = output[0][i];
-        maxIndex = i - 1;
+      for (int i = 1; i < output[0].length; i++) {  
+        if (output[0][i] > maxAccuracy) {
+          maxAccuracy = output[0][i];
+          maxIndex = i - 1;
+        }
       }
+
+      // ✅ Labels must match the output shape [1, 6]
+      List<String> poseLabels = ["Downdog", "Goddess", "Plank", "Tree", "Warrior2", "UnknownPose"];
+
+      // ✅ Apply Confidence Filtering
+      String detectedPose;
+      if (maxAccuracy < 0.1) {  
+        detectedPose = "No Pose Detected"; // No valid pose
+      } else if (maxAccuracy < 0.6) {  
+        detectedPose = "Unknown Pose"; // Likely not a yoga pose
+      } else {
+        detectedPose = poseLabels[maxIndex]; // Confident match
+      }
+
+      setState(() {
+        _detectedPose = detectedPose;
+        _accuracy = maxAccuracy;
+      });
+
+      print("🧘 Pose Detected: $_detectedPose (Accuracy: ${(_accuracy * 100).toStringAsFixed(1)}%)");
+    } catch (e) {
+      setState(() {
+        _detectedPose = "Error in detection";
+        _accuracy = 0.0;
+      });
+      print("❌ Error detecting pose: $e");
     }
-
-    // ✅ Labels must match the output shape [1, 6]
-    List<String> poseLabels = ["Downdog", "Goddess", "Plank", "Tree", "Warrior2", "UnknownPose"];
-
-    // ✅ Apply Confidence Filtering
-    String detectedPose;
-    if (maxAccuracy < 0.1) {  
-      detectedPose = "No Pose Detected"; // No valid pose
-    } else if (maxAccuracy < 0.6) {  
-      detectedPose = "Unknown Pose"; // Likely not a yoga pose
-    } else {
-      detectedPose = poseLabels[maxIndex]; // Confident match
-    }
-
-    // ✅ Set state only once (More Efficient)
-    setState(() {
-      _detectedPose = detectedPose;
-      _accuracy = maxAccuracy;
-    });
-
-    print("🧘 Pose Detected: $_detectedPose (Accuracy: ${(_accuracy * 100).toStringAsFixed(1)}%)");
-  } catch (e) {
-    setState(() {
-      _detectedPose = "Error in detection";
-      _accuracy = 0.0;
-    });
-    print("❌ Error detecting pose: $e");
   }
-}
 
-
-  /// 📏 Preprocess Image (Fix getPixel Error)
+  /// 📏 Preprocess Image (Fix `getPixel` Error)
   Future<List<List<List<List<double>>>>> _preprocessImage(File imageFile) async {
     try {
       Uint8List imageBytes = await imageFile.readAsBytes();
