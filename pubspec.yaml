@@ -19,7 +19,9 @@ dependencies:
   google_mlkit_commons: any
   tflite_flutter: ^0.11.0
   path_provider: ^2.0.15
+  video_player: ^2.3.0
   #tflite: ^1.1.2
+  shared_preferences: ^2.0.9
   firebase_core: ^3.12.1
   firebase_auth: ^5.5.1
   cloud_firestore: ^5.6.5
@@ -39,11 +41,14 @@ flutter:
     - assets/movenet_thunder.tflite
     - assets/images/yoga_home.png
     - assets/images/yoga_logo.png
+    - assets/images/yoga_thumbnail.png
     - assets/images/downdog.png
     - assets/images/goddess.png
     - assets/images/plank.png
     - assets/images/tree.png
     - assets/images/warrior2.png
+    - assets/yoga_video.mp4
+
 
 
 

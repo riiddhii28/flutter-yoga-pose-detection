@@ -76,10 +76,10 @@ class HomeScreen extends StatelessWidget {
                 ),
                 _buildFeatureButton(
                   context,
-                  "📜 Pose History", // ✅ Pose History Button Added
-                  "View your past pose analysis and track improvements.",
-                  Icons.history_rounded,
-                  "/poseHistory",
+                  "🧘‍♂️ Yoga Courses",
+                  "Explore yoga courses and videos.",
+                  Icons.video_library_rounded,
+                  "/yogaCourses", 
                 ),
                 _buildFeatureButton(
                   context,
@@ -128,7 +128,7 @@ class HomeScreen extends StatelessWidget {
           _buildDrawerItem(context, Icons.camera_alt_rounded, "Pose Detection", "/poseDetection"),
           _buildDrawerItem(context, Icons.book_rounded, "Pose Guide", "/poseGuide"),
           _buildDrawerItem(context, Icons.leaderboard_rounded, "Leaderboard", "/leaderboard"),
-          _buildDrawerItem(context, Icons.history_rounded, "Pose History", "/poseHistory"), // ✅ Pose History Added
+          _buildDrawerItem(context, Icons.video_library_rounded, "Yoga Courses", "/yogaCourses"),
           _buildDrawerItem(context, Icons.person_rounded, "My Profile", "/profile"),
           _buildDrawerItem(context, Icons.info_outline_rounded, "About", "/about"),
 

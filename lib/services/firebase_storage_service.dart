@@ -22,4 +22,24 @@ class FirebaseStorageService {
       return "";
     }
   }
+
+
+  // Method to upload video to Firebase Storage
+  Future<String> uploadVideo(File videoFile, String folderName) async {
+    try {
+      String fileName = basename(videoFile.path); // Get video file name
+      Reference storageRef = _storage.ref().child("$folderName/$fileName"); // Specify folder in Firebase Storage
+
+      UploadTask uploadTask = storageRef.putFile(videoFile); // Start upload
+      TaskSnapshot snapshot = await uploadTask; // Wait for upload to complete
+
+      // Get download URL
+      String downloadUrl = await snapshot.ref.getDownloadURL();
+      return downloadUrl; // Return the URL of the uploaded video
+    } catch (e) {
+      print("Error uploading video: $e");
+      return "";
+    }
+  }
+
 }
