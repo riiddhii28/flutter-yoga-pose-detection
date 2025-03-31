@@ -52,7 +52,7 @@ class ResultDisplay extends StatelessWidget {
               if (!isUnknownOrNoPose) ...[
                 SizedBox(height: 8),
                 Text(
-                  "Accuracy: ${(accuracy * 100).toStringAsFixed(1)}%",
+                  "Accuracy: ${isUnknownOrNoPose ? "0.0%" : "${(accuracy * 100).toStringAsFixed(1)}%"}",
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w500,

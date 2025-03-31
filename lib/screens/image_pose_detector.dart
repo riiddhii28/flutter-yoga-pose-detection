@@ -93,7 +93,10 @@ class _ImagePoseDetectorState extends State<ImagePoseDetector> {
 
       setState(() {
         _detectedPose = detectedPose;
-        _accuracy = maxAccuracy;
+        _accuracy = (detectedPose == "No Pose Detected" ||
+                detectedPose == "Unknown Pose")
+            ? 0.0
+            : maxAccuracy;
       });
 
       print("🧘 Pose Detected: $_detectedPose (Accuracy: ${(_accuracy * 100).toStringAsFixed(1)}%)");
