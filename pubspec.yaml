@@ -41,6 +41,7 @@ flutter:
     - assets/movenet_thunder.tflite
     - assets/images/yoga_home.png
     - assets/images/yoga_logo.png
+    - assets/images/default_avatar.png
     - assets/images/yoga_thumbnail.png
     - assets/images/downdog.png
     - assets/images/goddess.png

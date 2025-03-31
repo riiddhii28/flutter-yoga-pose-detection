@@ -65,10 +65,10 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFF9F5F0), // Light beige background
+      backgroundColor: Color(0xFFF9F5F0), 
       appBar: AppBar(
         title: Text("My Profile", style: TextStyle(color: Colors.white)),
-        backgroundColor: Color(0xFF6D3A3F), // Wine Red Header
+        backgroundColor: Color(0xFF6D3A3F), 
         elevation: 0,
       ),
       body: SingleChildScrollView(
@@ -123,7 +123,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
               child: Container(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [Color(0xFF6D3A3F), Color(0xFFA89A8D)], // Wine Red → Taupe Gradient
+                    colors: [Color(0xFF6D3A3F), Color(0xFFA89A8D)], 
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
@@ -153,7 +153,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
         children: [
-          Icon(icon, color: Color(0xFF6D3A3F)), // Wine Red Icons
+          Icon(icon, color: Color(0xFF6D3A3F)), 
           SizedBox(width: 10),
           Text(label, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
           Spacer(),

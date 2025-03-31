@@ -84,11 +84,11 @@ class _ImagePoseDetectorState extends State<ImagePoseDetector> {
       // ✅ Apply Confidence Filtering
       String detectedPose;
       if (maxAccuracy < 0.1) {  
-        detectedPose = "No Pose Detected"; // No valid pose
+        detectedPose = "No Pose Detected"; 
       } else if (maxAccuracy < 0.6) {  
-        detectedPose = "Unknown Pose"; // Likely not a yoga pose
+        detectedPose = "Unknown Pose"; 
       } else {
-        detectedPose = poseLabels[maxIndex]; // Confident match
+        detectedPose = poseLabels[maxIndex];
       }
 
       setState(() {
@@ -124,7 +124,7 @@ class _ImagePoseDetectorState extends State<ImagePoseDetector> {
           (y) => List.generate(
             224,
             (x) {
-              var pixel = resizedImage.getPixelSafe(x, y); // ✅ FIXED getPixel()
+              var pixel = resizedImage.getPixelSafe(x, y); 
               return [
                 pixel.r / 255.0,
                 pixel.g / 255.0,

@@ -12,7 +12,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final FirebaseAuthService _authService = FirebaseAuthService();
-  String? errorMessage; // Store error message for failed login
+  String? errorMessage; 
 
   void _login() async {
     var user = await _authService.signIn(emailController.text, passwordController.text);
@@ -53,7 +53,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 decoration: InputDecoration(
                   labelText: "Email",
                   hintText: "Enter your email",
-                  prefixIcon: Icon(Icons.email, color: Color(0xFF6D3A3F)), // Wine Red Icon
+                  prefixIcon: Icon(Icons.email, color: Color(0xFF6D3A3F)), 
                   filled: true,
                   fillColor: Color(0xFFE1E1E1), // Soft Gray Background
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
@@ -68,9 +68,9 @@ class _LoginScreenState extends State<LoginScreen> {
                 decoration: InputDecoration(
                   labelText: "Password",
                   hintText: "Enter your password",
-                  prefixIcon: Icon(Icons.lock, color: Color(0xFF6D3A3F)), // Wine Red Icon
+                  prefixIcon: Icon(Icons.lock, color: Color(0xFF6D3A3F)), 
                   filled: true,
-                  fillColor: Color(0xFFE1E1E1), // Soft Gray Background
+                  fillColor: Color(0xFFE1E1E1), 
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
                 ),
               ),
@@ -89,8 +89,8 @@ class _LoginScreenState extends State<LoginScreen> {
               ElevatedButton(
                 onPressed: _login,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFF6D3A3F), // Wine Red Button
-                  foregroundColor: Colors.white, // White Text
+                  backgroundColor: Color(0xFF6D3A3F), 
+                  foregroundColor: Colors.white, 
                   padding: EdgeInsets.symmetric(horizontal: 40, vertical: 14),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                 ),
@@ -107,7 +107,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   "Don't have an account? Sign up",
                   style: TextStyle(
                     fontSize: 16,
-                    color: Color(0xFF6D3A3F), // Wine Red Text
+                    color: Color(0xFF6D3A3F), 
                     fontWeight: FontWeight.w500,
                   ),
                 ),

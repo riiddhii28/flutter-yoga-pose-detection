@@ -59,14 +59,14 @@ class AuthCheck extends StatelessWidget {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Scaffold(
-            backgroundColor: Color(0xFFE9E8E7), // Light Background
+            backgroundColor: Color(0xFFE9E8E7),
             body: Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Image.asset("assets/images/yoga_loader.png", height: 100), // Placeholder Image
+                  Image.asset("assets/images/yoga_loader.png", height: 100),
                   SizedBox(height: 20),
-                  CircularProgressIndicator(color: Color(0xFF6D3A3F)), // Themed Loader
+                  CircularProgressIndicator(color: Color(0xFF6D3A3F)), 
                   SizedBox(height: 10),
                   Text(
                     "Loading YogaBliss...",

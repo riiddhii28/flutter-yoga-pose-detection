@@ -4,10 +4,10 @@ class AboutScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFF9F5F0), // Light beige background
+      backgroundColor: Color(0xFFF9F5F0), 
       appBar: AppBar(
         title: Text("About YogaBliss", style: TextStyle(color: Colors.white)),
-        backgroundColor: Color(0xFF6D3A3F), // Wine red
+        backgroundColor: Color(0xFF6D3A3F), 
         elevation: 0,
       ),
       body: SingleChildScrollView(
@@ -18,7 +18,7 @@ class AboutScreen extends StatelessWidget {
             children: [
               // App Logo
               ClipRRect(
-                borderRadius: BorderRadius.circular(15), // Rounded corners
+                borderRadius: BorderRadius.circular(15), 
                 child: Image.asset(
                   "assets/images/yoga_logo.png",
                   height: 120,
@@ -53,7 +53,7 @@ class AboutScreen extends StatelessWidget {
               _buildFeatureItem("📈 Progress Tracker", "Monitor your improvement over time."),
               _buildFeatureItem("🧘 Yoga Resources", "Discover benefits, breathing exercises, and more."),
               _buildFeatureItem("🔔 Reminders & Challenges", "Set daily goals and stay motivated."),
-              _buildFeatureItem("📜 Pose History", "Track your past yoga poses and improvements."), // ✅ Pose History Added
+              _buildFeatureItem("📜 Pose History", "Track your past yoga poses and improvements."), 
 
               SizedBox(height: 30),
 
@@ -89,7 +89,7 @@ class AboutScreen extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(Icons.check_circle, color: Color(0xFF6D3A3F)), // Dark red tick
+          Icon(Icons.check_circle, color: Color(0xFF6D3A3F)), 
           SizedBox(width: 10),
           Expanded(
             child: Column(

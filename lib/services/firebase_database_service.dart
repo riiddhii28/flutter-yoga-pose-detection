@@ -9,7 +9,7 @@ class FirebaseDatabaseService {
       "email": email,
       "highestAccuracy": 0.0,  // Initial accuracy
       "createdAt": Timestamp.now(),
-      "profileImageUrl": "",  // Initialize profile image
+      "profileImageUrl": "",  
     });
   }
 

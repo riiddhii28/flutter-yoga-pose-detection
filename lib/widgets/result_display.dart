@@ -21,7 +21,7 @@ class ResultDisplay extends StatelessWidget {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
         ),
-        color: Color(0xFFE9E8E7), // Light Beige Background
+        color: Color(0xFFE9E8E7), 
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
@@ -44,7 +44,7 @@ class ResultDisplay extends StatelessWidget {
                   fontWeight: FontWeight.w600,
                   color: isUnknownOrNoPose
                       ? Colors.redAccent
-                      : Color(0xFF6D3A3F), // Wine Red for valid poses
+                      : Color(0xFF6D3A3F), 
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -56,16 +56,16 @@ class ResultDisplay extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w500,
-                    color: Color(0xFFA89A8D), // Taupe
+                    color: Color(0xFFA89A8D), 
                   ),
                 ),
                 SizedBox(height: 16),
                 AnimatedContainer(
                   duration: Duration(milliseconds: 500),
-                  width: (accuracy * 200).clamp(10.0, 200.0), // Min width 10px
+                  width: (accuracy * 200).clamp(10.0, 200.0),
                   height: 10,
                   decoration: BoxDecoration(
-                    color: Color(0xFF6D3A3F), // Wine Red
+                    color: Color(0xFF6D3A3F), 
                     borderRadius: BorderRadius.circular(5),
                   ),
                 ),

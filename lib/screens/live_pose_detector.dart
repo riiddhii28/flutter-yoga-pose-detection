@@ -160,7 +160,7 @@ class _LivePoseDetectorState extends State<LivePoseDetector> {
           : Stack(
               children: [
                 CameraPreview(_cameraController!),
-                SkeletonOverlay(keypoints: keypoints), // Overlay Skeleton
+                SkeletonOverlay(keypoints: keypoints), 
                 Positioned(
                   bottom: 20,
                   left: 20,

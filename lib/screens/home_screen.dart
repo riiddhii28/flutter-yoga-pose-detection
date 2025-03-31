@@ -8,13 +8,13 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFF9F5F0), // Light beige background
+      backgroundColor: Color(0xFFF9F5F0),
       appBar: AppBar(
         title: Text("YogaBliss 🧘‍♂️", style: TextStyle(color: Colors.white)),
-        backgroundColor: Color(0xFF6D3A3F), // Wine red
+        backgroundColor: Color(0xFF6D3A3F), 
         elevation: 0,
       ),
-      drawer: _buildDrawer(context), // ✅ Updated Sidebar
+      drawer: _buildDrawer(context),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(

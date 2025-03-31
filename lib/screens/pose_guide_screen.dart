@@ -32,10 +32,10 @@ class PoseGuideScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFF8F5F2), // Soft background color
+      backgroundColor: Color(0xFFF8F5F2), 
       appBar: AppBar(
         title: Text("🧘 Pose Guide", style: TextStyle(color: Colors.white)),
-        backgroundColor: Color(0xFF6D3A3F), // Wine red theme
+        backgroundColor: Color(0xFF6D3A3F), 
         elevation: 0,
       ),
       body: Padding(
