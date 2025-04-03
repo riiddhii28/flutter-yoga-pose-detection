@@ -57,6 +57,7 @@ assets/*
 
 # Allow the images folder inside assets
 !assets/images/
+!assets/readme_images/
 
 # Track only image files inside assets/images/
 !assets/images/*.png
