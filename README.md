@@ -1,6 +1,6 @@
 # 🧘 YogaBliss – AI-Powered Yoga Pose Detection  
 
-🚀 **YogaBliss** is a Flutter-based mobile app that helps users improve their yoga practice using AI-powered **pose detection and classification**. It allows users to upload images/videos for analysis and get real-time feedback on their yoga postures.  
+🚀 **YogaBliss** is a Flutter-based mobile app that helps users improve their yoga practice using **pose detection and classification**. It allows users to upload images for analysis and get real-time feedback on their yoga postures.  
 
 ## 🌟 Features  
 
@@ -8,6 +8,29 @@
 ✅ **User-Friendly UI** – Intuitive design for a smooth experience.  
 ✅ **Resources & Courses** – Learn more about yoga through integrated videos and courses.  
 ✅ **Optimized for Mobile** – Uses **TensorFlow Lite** for lightweight, efficient pose detection.  
+
+
+---
+
+## 📱 App Screenshots  
+
+### 🔹 **Home Screen**  
+<img src="https://raw.githubusercontent.com/riiddhii28/flutter-yoga-pose-detection/main/assets/readme_images/home_screen.jpeg" alt="Home Screen" width="300">  
+
+### 🔹 **Pose Detection Screen**  
+<img src="https://raw.githubusercontent.com/riiddhii28/flutter-yoga-pose-detection/main/assets/readme_images/pose_detection.jpeg" alt="Pose Detection Screen" width="300">  
+
+### 🔹 **Pose Guide Screen**  
+<img src="https://raw.githubusercontent.com/riiddhii28/flutter-yoga-pose-detection/main/assets/readme_images/pose_guide.jpeg" alt="Pose Guide Screen" width="300">  
+
+### 🔹 **Other**  
+<img src="https://raw.githubusercontent.com/riiddhii28/flutter-yoga-pose-detection/main/assets/readme_images/no_pose.jpeg" alt="No Pose" width="300">  
+
+<img src="https://raw.githubusercontent.com/riiddhii28/flutter-yoga-pose-detection/main/assets/readme_images/sidebar.jpeg" alt="Sidebar" width="300"> 
+
+<img src="https://raw.githubusercontent.com/riiddhii28/flutter-yoga-pose-detection/main/assets/readme_images/user.jpeg" alt="User" width="300">  
+
+---
 
 ## 📂 Dataset  
 YogaBliss is trained on the **Yoga Pose Classification** dataset from Kaggle:  
