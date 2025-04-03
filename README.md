@@ -6,14 +6,8 @@
 
 ✅ **Pose Classification** – Detects and classifies yoga poses from uploaded images/videos.  
 ✅ **User-Friendly UI** – Intuitive design for a smooth experience.  
-✅ **Pose History** – Save and review detected yoga poses.  
 ✅ **Resources & Courses** – Learn more about yoga through integrated videos and courses.  
 ✅ **Optimized for Mobile** – Uses **TensorFlow Lite** for lightweight, efficient pose detection.  
-
-🚧 **Future Work:**  
-- 🔹 **Live Pose Detection** – Real-time pose tracking using the camera.  
-- 🔹 **Enhanced Accuracy** – Improving model performance for better results.  
-- 🔹 **Personalized Feedback** – Suggest corrections based on detected poses.  
 
 ## 📂 Dataset  
 YogaBliss is trained on the **Yoga Pose Classification** dataset from Kaggle, containing 5 yoga poses:  

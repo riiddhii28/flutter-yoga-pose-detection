@@ -52,4 +52,14 @@ migrate_working_dir/
 firebase-debug.log
 .firestore/
 
-assets/
+# Ignore everything inside assets/
+assets/*
+
+# Allow the images folder inside assets
+!assets/images/
+
+# Track only image files inside assets/images/
+!assets/images/*.png
+
+
+
