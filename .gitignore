@@ -59,9 +59,10 @@ assets/*
 !assets/images/
 !assets/readme_images/
 
-# Track only image files inside assets/images/
-!assets/images/*.png
-!assets/readme_images/*.jpeg
+# Track all image files inside allowed folders
+!assets/images/*
+!assets/readme_images/*
+
 
 
 
