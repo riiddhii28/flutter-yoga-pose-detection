@@ -20,12 +20,22 @@ This dataset contains **5 yoga poses** with images:
 - 🌲 **Tree**  
 - 🏹 **Warrior2**  
 
+## 🔥 Model Training  
+
+The **TensorFlow Lite model** used in YogaBliss was trained using Google Colab. You can view the complete training process and code here:  
+🔗 **[YogaBliss Model Training Notebook](https://colab.research.google.com/drive/1Nja1O9GkNPofoix8EtKbfo7nZYF-JihF?usp=sharing)**  
+
+### **Training Details:**  
+- Model: **CNN-based classifier** trained on **Yoga Pose Classification** dataset  
+- Framework: **TensorFlow & Keras**  
+- Optimized for mobile deployment using **TensorFlow Lite**  
+
 ## 🚀 Installation  
 
 1️⃣ **Clone the repository**  
 ```bash
-git clone https://github.com/riiddhii28/yoga.git
-cd yoga
+git clone https://github.com/riiddhii28/flutter-yoga-pose-detection.git
+cd flutter-yoga-pose-detection
 ```  
 
 2️⃣ **Install dependencies**  
@@ -42,7 +52,7 @@ flutter run
 
 - **Flutter** (Dart) – Frontend framework  
 - **TensorFlow Lite** – AI model integration  
-- **Firebase** (Future Integration) – User data and authentication  
+- **Firebase** – User data and authentication  
 
 ## 🔍 Keywords (for GitHub search)  
 `Flutter`, `Yoga`, `Pose Detection`, `AI`, `Machine Learning`, `TensorFlow Lite`, `Yoga App`, `Pose Classification`, `Health`, `Wellness`, `Mobile AI`, `Fitness App`, `Yoga AI`  
