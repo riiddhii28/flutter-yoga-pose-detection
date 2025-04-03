@@ -10,7 +10,10 @@
 ✅ **Optimized for Mobile** – Uses **TensorFlow Lite** for lightweight, efficient pose detection.  
 
 ## 📂 Dataset  
-YogaBliss is trained on the **Yoga Pose Classification** dataset from Kaggle, containing 5 yoga poses:  
+YogaBliss is trained on the **Yoga Pose Classification** dataset from Kaggle:  
+[![Kaggle Dataset](https://img.shields.io/badge/Kaggle-Yoga%20Pose%20Classification-blue?style=flat&logo=kaggle)](https://www.kaggle.com/datasets/ujjwalchowdhury/yoga-pose-classification)  
+
+This dataset contains **5 yoga poses** with images:  
 - 🧎 **Downdog**  
 - 💪 **Plank**  
 - 🏋️ **Goddess**  
