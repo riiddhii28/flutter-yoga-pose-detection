@@ -15,7 +15,7 @@
 ## 📱 App Screenshots  
 
 ### 🔹 **Home Screen**  
-<img src="https://raw.githubusercontent.com/riiddhii28/flutter-yoga-pose-detection/main/assets/readme_images/home_screen.jpeg" alt="Home Screen" width="300">  
+<img src="https://github.com/riiddhii28/flutter-yoga-pose-detection/blob/main/assets/readme_images/home_screen.jpeg?raw=true" alt="Home Screen" width="300">  
 
 ### 🔹 **Pose Detection Screen**  
 <img src="https://raw.githubusercontent.com/riiddhii28/flutter-yoga-pose-detection/main/assets/readme_images/pose_detection.jpeg" alt="Pose Detection Screen" width="300">  
