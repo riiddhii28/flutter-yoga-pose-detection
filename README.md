@@ -1,4 +1,4 @@
-# 🧘 YogaBliss – AI-Powered Yoga Pose Detection  
+# 🧘 YogaBliss – Yoga Pose Detection  
 
 🚀 **YogaBliss** is a Flutter-based mobile app that helps users improve their yoga practice using **pose detection and classification**. It allows users to upload images for analysis and get real-time feedback on their yoga postures.  
 
@@ -12,23 +12,22 @@
 
 ---
 
-## 📱 App Screenshots  
+# 📱 App Screenshots  
 
-### 🔹 **Home Screen**  
-<img src="https://github.com/riiddhii28/flutter-yoga-pose-detection/blob/main/assets/readme_images/home_screen.jpeg?raw=true" alt="Home Screen" width="300">  
+### 🔹 **Main Screens**  
+<p align="center">
+  <img src="https://github.com/riiddhii28/flutter-yoga-pose-detection/blob/main/assets/readme_images/home_screen.jpeg?raw=true" alt="Home Screen" width="30%">
+  <img src="https://github.com/riiddhii28/flutter-yoga-pose-detection/blob/main/assets/readme_images/pose_detection.jpeg?raw=true" alt="Pose Detection Screen" width="30%">
+  <img src="https://github.com/riiddhii28/flutter-yoga-pose-detection/blob/main/assets/readme_images/pose_guide.jpeg?raw=true" alt="Pose Guide Screen" width="30%">
+</p>
 
-### 🔹 **Pose Detection Screen**  
-<img src="https://github.com/riiddhii28/flutter-yoga-pose-detection/blob/main/assets/readme_images/pose_detection.jpeg?raw=true" alt="Pose Detection Screen" width="300">  
+### 🔹 **Other Screens**  
+<p align="center">
+  <img src="https://github.com/riiddhii28/flutter-yoga-pose-detection/blob/main/assets/readme_images/no_pose.jpeg?raw=true" alt="No Pose" width="30%">
+  <img src="https://github.com/riiddhii28/flutter-yoga-pose-detection/blob/main/assets/readme_images/sidebar.jpeg?raw=true" alt="Sidebar" width="30%">
+  <img src="https://github.com/riiddhii28/flutter-yoga-pose-detection/blob/main/assets/readme_images/user.jpeg?raw=true" alt="User" width="30%">
+</p>
 
-### 🔹 **Pose Guide Screen**  
-<img src="https://github.com/riiddhii28/flutter-yoga-pose-detection/blob/main/assets/readme_images/pose_guide.jpeg?raw=true" alt="Pose Guide Screen" width="300">  
-
-### 🔹 **Other**  
-<img src="https://github.com/riiddhii28/flutter-yoga-pose-detection/blob/main/assets/readme_images/no_pose.jpeg?raw=true" alt="No Pose" width="300">  
-
-<img src="https://github.com/riiddhii28/flutter-yoga-pose-detection/blob/main/assets/readme_images/sidebar.jpeg?raw=true" alt="Sidebar" width="300"> 
-
-<img src="https://github.com/riiddhii28/flutter-yoga-pose-detection/blob/main/assets/readme_images/user.jpeg?raw=true" alt="User" width="300">  
 
 ---
 
