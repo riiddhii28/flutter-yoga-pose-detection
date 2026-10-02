@@ -63,6 +63,9 @@ assets/*
 !assets/images/*
 !assets/readme_images/*
 
+# Keep macOS metadata ignored after asset exceptions
+.DS_Store
+
 
 
 
